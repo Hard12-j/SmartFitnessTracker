@@ -1,0 +1,66 @@
+body{
+    background-color: rgb(45, 45, 45);
+}
+
+::placeholder{
+    color: olive;
+}
+
+.container{
+    display: flex;
+    gap: 10px;
+    background-color: whitesmoke;
+    width : 30%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: solid black 2px;
+    border-radius: 20px;
+    margin: 5% 30%;
+    padding : 5%;
+}
+
+.form-grp{
+    margin-top: 10px;
+}
+
+.link{
+    margin-top: 20px;
+    color: olive;
+    font-size:smaller;
+}
+
+.input{
+    margin-top: 5px;
+    height: 25px;
+    border: solid olive 2px;
+    border-radius: 5px;
+}
+
+.user{
+    display: flex;
+    flex-direction: row;
+    justify-content:space-around;
+    gap: 5px;
+    margin-top: 20px;
+}
+
+.btn{
+    height: 40px;
+    width: 150px;
+    background-color: rgb(11, 81, 8);
+    color: whitesmoke;
+    border-radius: 5px;
+}
+
+.btn:hover{
+    background-color: whitesmoke;
+    color: olive;
+    border: solid 2px rgb(11, 81, 8);
+}
+
+
+
+.heading{
+    color: olive;
+}

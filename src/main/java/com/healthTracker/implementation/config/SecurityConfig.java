@@ -1,4 +1,4 @@
-package com.codeWithRaman.implementation.config;
+package com.healthTracker.implementation.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,9 +7,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.csrf.CsrfAuthenticationStrategy;
 
-import com.codeWithRaman.implementation.service.CustomUserDetails;
+
+import com.healthTracker.implementation.service.CustomUserDetails;
 
 @Configuration
 @EnableWebSecurity
@@ -28,6 +28,7 @@ public class SecurityConfig {
 						.anyRequest().authenticated())
 				.formLogin(form -> form.loginPage("/login").loginProcessingUrl("/login").defaultSuccessUrl("/welcome", true).permitAll())
 				.logout(logout -> logout.logoutSuccessUrl("/login").permitAll()).userDetailsService(customUserDetails);
+
 		return http.build();
 	}
 
