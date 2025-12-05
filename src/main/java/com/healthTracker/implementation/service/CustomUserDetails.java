@@ -1,12 +1,12 @@
-package com.codeWithRaman.implementation.service;
+package com.healthTracker.implementation.service;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.codeWithRaman.implementation.model.User;
-import com.codeWithRaman.implementation.repository.UserRepository;
+import com.healthTracker.implementation.model.User;
+import com.healthTracker.implementation.repository.UserRepository;
 
 @Service
 public class CustomUserDetails implements UserDetailsService{
@@ -21,7 +21,7 @@ public class CustomUserDetails implements UserDetailsService{
 		// TODO Auto-generated method stub
 		User user = userRepository.findByUsername(username);
 		if(user == null) {
-			throw new UsernameNotFoundException("user not found with givn username");
+			throw new UsernameNotFoundException("user not found with given username");
 		}
 		return org.springframework.security.core.userdetails.User.withUsername(user.getUsername()).password(user.getPassword()).roles(user.getRole()).build();
 	}

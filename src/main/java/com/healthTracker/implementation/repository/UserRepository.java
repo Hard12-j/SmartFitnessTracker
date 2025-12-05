@@ -1,13 +1,13 @@
-package com.codeWithRaman.implementation.repository;
+package com.healthTracker.implementation.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.codeWithRaman.implementation.model.User;
+import com.healthTracker.implementation.model.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-	User findByUsername(String username);
+	public User findByUsername(String username);
 
 }
