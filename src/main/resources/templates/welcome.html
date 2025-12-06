@@ -9,7 +9,7 @@
             --primary-hover: #4338CA;
             --bg-color: #242d3f;
             --card-bg: #d4e7f7;
-            --text-main:#d4e7f7;
+            --text-main: #d4e7f7;
             --text-secondary: #6B7280;
             --danger-color: #EF4444;
         }
@@ -147,6 +147,45 @@
         .btn-card:hover {
             background-color: var(--primary-hover);
         }
+
+        .btn-card:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Dropdown Styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--card-bg);
+            min-width: 160px;
+            box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 0.375rem;
+            top: 100%;
+            /* Position below the link */
+        }
+
+        .dropdown-content a {
+            color: var(--text-secondary);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-weight: 400;
+        }
+
+        .dropdown-content a:hover {
+            background-color: rgba(79, 70, 229, 0.1);
+            color: var(--primary-color);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
     </style>
 </head>
 
@@ -155,6 +194,14 @@
     <nav class="navbar">
         <a href="#" class="navbar-brand">HealthTracker</a>
         <div class="nav-links">
+            <div class="dropdown">
+                <a href="#" class="nav-link">Activity ▾</a>
+                <div class="dropdown-content">
+                    <a href="/workouts">Workouts</a>
+                    <a href="/meals">Meals</a>
+                    <a href="/daily-logs">Daily Log</a>
+                </div>
+            </div>
             <a href="/profile" class="nav-link">My Profile</a>
             <a href="/logout" class="btn-logout">Logout</a>
         </div>
@@ -166,31 +213,7 @@
             <p>Track your progress and stay healthy.</p>
         </div>
 
-        <div class="dashboard-grid">
-            <!-- Workout Card -->
-            <div class="card">
-                <div class="card-icon">🏃‍♀️</div>
-                <h2 class="card-title">Workouts</h2>
-                <p class="card-desc">Log your daily exercises, track duration, and monitor calories burned.</p>
-                <a href="/workouts" class="btn-card">Track Workouts</a>
-            </div>
 
-            <!-- Meal Card -->
-            <div class="card">
-                <div class="card-icon">🍱</div>
-                <h2 class="card-title">Meals</h2>
-                <p class="card-desc">Keep track of your nutrition, calories, and macros for every meal.</p>
-                <a href="/meals" class="btn-card">Track Meals</a>
-            </div>
-
-            <!-- Daily Log Card -->
-            <div class="card">
-                <div class="card-icon">💧</div>
-                <h2 class="card-title">Daily Log</h2>
-                <p class="card-desc">Monitor your water intake, sleep duration, and daily wellness notes.</p>
-                <a href="/daily-logs" class="btn-card">View Daily Log</a>
-            </div>
-        </div>
     </div>
 
 </body>
