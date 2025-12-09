@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>Dashboard - Health Tracker</title>
+    <title>BMI Calculator - Health Tracker</title>
     <style>
         :root {
             --primary-color: #4F46E5;
@@ -10,8 +10,10 @@
             --bg-color: #242d3f;
             --card-bg: #d4e7f7;
             --text-main: #d4e7f7;
+            --text-card: #242d3f;
             --text-secondary: #6B7280;
             --danger-color: #EF4444;
+            --input-border: #cbd5e1;
         }
 
         body {
@@ -70,86 +72,87 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 600px;
             margin: 3rem auto;
             padding: 0 1.5rem;
         }
 
-        .welcome-header {
+        .page-header {
             text-align: center;
             margin-bottom: 3rem;
         }
 
-        .welcome-header h1 {
+        .page-header h1 {
             font-size: 2.5rem;
             margin-bottom: 0.5rem;
             color: var(--text-main);
         }
 
-        .welcome-header p {
-            color: #d4e7f7;
-            font-size: 1.1rem;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
         .card {
             background-color: var(--card-bg);
             border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            padding: 2rem;
-            text-align: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            height: 100%;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            color: var(--text-card);
         }
 
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-
-        .card-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        .card-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #242d3f;
-        }
-
-        .card-desc {
-            color: var(--text-secondary);
+        .form-group {
             margin-bottom: 1.5rem;
-            line-height: 1.5;
         }
 
-        .btn-card {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 0.75rem 1.5rem;
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-card);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--input-border);
             border-radius: 0.5rem;
-            text-decoration: none;
-            font-weight: 500;
-            display: inline-block;
-            transition: background-color 0.2s;
+            font-size: 1rem;
+            box-sizing: border-box;
+            font-family: inherit;
         }
 
-        .btn-card:hover {
-            background-color: var(--primary-hover);
+        .btn-submit {
+            background-color: #D97706;
+            /* Orange color from mockup */
+            color: white;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 2rem;
+            /* Rounded pill shape */
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.2s;
         }
 
-        .btn-card:hover {
-            background-color: var(--primary-hover);
+        .btn-submit:hover {
+            opacity: 0.9;
+        }
+
+        .result-section {
+            margin-top: 2rem;
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .text-green {
+            color: #059669;
+        }
+
+        .text-orange {
+            color: #D97706;
+        }
+
+        .text-red {
+            color: #DC2626;
         }
 
         /* Dropdown Styles */
@@ -167,7 +170,6 @@
             z-index: 1;
             border-radius: 0.375rem;
             top: 100%;
-            /* Position below the link */
         }
 
         .dropdown-content a {
@@ -191,7 +193,7 @@
 
 <body>
     <nav class="navbar">
-        <a href="#" class="navbar-brand">HealthTracker</a>
+        <a href="/welcome" class="navbar-brand">HealthTracker</a>
         <div class="nav-links">
             <div class="dropdown">
                 <a href="#" class="nav-link">Activity ▾</a>
@@ -201,38 +203,51 @@
                     <a href="/daily-logs">Daily Log</a>
                 </div>
             </div>
-            <a href="/bmi" class="nav-link">BMI Calculator</a>
+            <a href="/welcome" class="nav-link">Dashboard</a>
             <a href="/profile" class="nav-link">My Profile</a>
             <a href="/logout" class="btn-logout">Logout</a>
         </div>
     </nav>
 
     <div class="container">
-        <div class="welcome-header">
-            <h1>Welcome Back!</h1>
-            <p>Track your progress and stay healthy.</p>
+        <div class="page-header">
+            <h1>BMI Calculator</h1>
+            <p style="color: #d4e7f7;">Calculate your Body Mass Index</p>
         </div>
 
-        <div class="dashboard-grid">
-            <div class="card"
-                 style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; grid-column: 1 / -1;">
-                <div class="card-content"
-                     style="display: flex; flex-direction: column; align-items: start; text-align: left;">
-                    <h2 class="card-title" style="color: #38bdf8; margin-bottom: 0.5rem;">
-                        <span
-                                style="font-size: 1.2rem; display: block; color: #94a3b8; font-weight: normal; margin-bottom: 0.25rem;">Daily
-                            Health Tip</span>
-                        <span th:text="${healthTip.title}">Stay Hydrated</span>
-                    </h2>
-                    <p class="card-desc"
-                       style="color: #cbd5e1; font-size: 1.1rem; max-width: 800px; margin-bottom: 0;"
-                       th:text="${healthTip.description}">
-                        Drink at least 8 glasses of water daily to maintain optimal health.
-                    </p>
-                    <div style="margin-top: 1rem; padding: 0.25rem 0.75rem; background: rgba(56, 189, 248, 0.1); border-radius: 1rem; color: #38bdf8; font-size: 0.875rem;"
-                         th:text="${healthTip.category}">
-                        Hydration
+        <div class="card">
+            <form action="/calculate-bmi" method="post">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="form-group">
+                        <label class="form-label">Height (cm)</label>
+                        <input type="number" step="any" name="height" class="form-control" placeholder="Enter height"
+                            required th:value="${height}">
                     </div>
+                    <div class="form-group">
+                        <label class="form-label">Weight (kg)</label>
+                        <input type="number" step="any" name="weight" class="form-control" placeholder="Enter weight"
+                            required th:value="${weight}">
+                    </div>
+                </div>
+                <!-- Error display -->
+                <div th:if="${error}" style="color: #DC2626; margin-bottom: 1rem; text-align: center;">
+                    <span th:text="${error}"></span>
+                </div>
+
+                <button type="submit" class="btn-submit">Calculate BMI</button>
+            </form>
+
+            <div th:if="${bmiValue}" class="result-section">
+                <div style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Your BMI Result
+                </div>
+                <div style="font-size: 3rem; font-weight: bold; color: var(--text-card); line-height: 1;"
+                    th:text="${bmiValue}">22.5</div>
+
+                <div style="margin: 1rem 0; font-weight: bold; font-size: 1.25rem;" th:class="${colorClass}"
+                    th:text="${bmiStatus}">Normal</div>
+
+                <div style="color: var(--text-secondary);" th:text="${bmiGuidance}">
+                    Guidance text here.
                 </div>
             </div>
         </div>

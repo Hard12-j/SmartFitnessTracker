@@ -15,21 +15,20 @@ import java.security.Principal;
 
 @Controller
 public class AuthController {
-	
-	@Autowired
-	private UserService userService;
 
-	@GetMapping("/register")
-	public String register(Model model) {
+    @Autowired
+    private UserService userService;
+
+    @GetMapping("/register")
+    public String register(Model model) {
         model.addAttribute("user", new User());
-		return "register";
-	}
+        return "register";
+    }
 
     @PostMapping("/register")
     public String registerUser(@Valid @ModelAttribute("user") User user,
-                               Model model) {
+            Model model) {
         System.out.println(user.getPassword().equals(user.getCnfPassword()));
-
 
         if (!user.getPassword().equals(user.getCnfPassword())) {
             model.addAttribute("error", "Passwords do not match!");
@@ -50,25 +49,29 @@ public class AuthController {
 
     @ModelAttribute
     public void getUserDtls(Principal p, Model model) {
-        if(p !=null){
+        if (p != null) {
             String username = p.getName();
             User userDtls = userService.getUserByUsername(username);
-            model.addAttribute("user",userDtls);
+            model.addAttribute("user", userDtls);
         }
     }
-    
-	@GetMapping("/login")
-	public String login() {
-		return "login";
-	}
-	
-	@GetMapping("/welcome")
-	public String welcome() {
-		return "welcome";
-	}
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+
+    @Autowired
+    private com.healthTracker.implementation.service.HealthTipService healthTipService;
+
+    @GetMapping("/welcome")
+    public String welcome(Model model) {
+        model.addAttribute("healthTip", healthTipService.getDailyTip());
+        return "welcome";
+    }
 
     @GetMapping("profile")
-    public String profile(){
+    public String profile() {
         return "profile";
     }
 
