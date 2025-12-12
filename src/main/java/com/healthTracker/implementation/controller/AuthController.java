@@ -1,5 +1,6 @@
 package com.healthTracker.implementation.controller;
 
+import com.healthTracker.implementation.dto.UserDto;
 import com.healthTracker.implementation.model.User;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,24 +22,37 @@ public class AuthController {
 
     @GetMapping("/register")
     public String register(Model model) {
-        model.addAttribute("user", new User());
+        model.addAttribute("user", new UserDto());
         return "register";
     }
 
     @PostMapping("/register")
-    public String registerUser(@Valid @ModelAttribute("user") User user,
-            Model model) {
-        System.out.println(user.getPassword().equals(user.getCnfPassword()));
+    public String registerUser(@Valid @ModelAttribute("user") UserDto userDto,
+            org.springframework.validation.BindingResult result,
+            Model model,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        System.out.println(userDto.getPassword().equals(userDto.getCnfPassword()));
 
-        if (!user.getPassword().equals(user.getCnfPassword())) {
+        if (result.hasErrors()) {
+            return "register";
+        }
+
+        if (!userDto.getPassword().equals(userDto.getCnfPassword())) {
             model.addAttribute("error", "Passwords do not match!");
             return "register";
         }
 
         try {
+            User user = new User();
+            user.setFirst(userDto.getFirst());
+            user.setLast(userDto.getLast());
+            user.setUsername(userDto.getUsername());
+            user.setPassword(userDto.getPassword());
+            user.setRole(userDto.getRole());
+
             userService.registerUser(user);
             System.out.println("successfully registered");
-            model.addAttribute("success", "User registered successfully!");
+            redirectAttributes.addFlashAttribute("success", "User registered successfully!");
             return "redirect:/login";
         } catch (Exception e) {
             System.out.println("Passwords do not match!");

@@ -12,6 +12,7 @@
             --card-bg: #d4e7f7;
             --text-secondary: #6B7280;
             --danger-color: #EF4444;
+            --success-color: #10B981;
             --input-border: #cbd5e1;
         }
 
@@ -131,6 +132,24 @@
         .mt-3 {
             margin-top: 1rem;
         }
+
+        .success-msg {
+            color: var(--success-color);
+            background-color: rgba(16, 185, 129, 0.1);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .error-msg {
+            color: var(--danger-color);
+            background-color: rgba(239, 68, 68, 0.1);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
     </style>
 </head>
 
@@ -139,6 +158,22 @@
         <div class="login-header">
             <h1>Login</h1>
             <p>Welcome Back! Please enter your credentials.</p>
+        </div>
+
+        <div th:if="${success}" class="success-msg">
+            <p th:text="${success}" style="margin:0"></p>
+        </div>
+
+        <div th:if="${param.error != null}">
+            <div th:if="${param.error[0] == 'email'}" class="error-msg">
+                Invalid Email.
+            </div>
+            <div th:if="${param.error[0] == 'password'}" class="error-msg">
+                Incorrect Password.
+            </div>
+            <div th:if="${param.error[0] != 'email' and param.error[0] != 'password'}" class="error-msg">
+                Invalid username or password.
+            </div>
         </div>
 
         <form action="/login" method="post">
