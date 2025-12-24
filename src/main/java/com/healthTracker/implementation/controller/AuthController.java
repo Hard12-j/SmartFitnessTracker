@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import com.healthTracker.implementation.service.UserService;
 
 import java.security.Principal;
+import java.util.List;
 
 @Controller
 public class AuthController {
@@ -61,15 +62,6 @@ public class AuthController {
         }
     }
 
-    @ModelAttribute
-    public void getUserDtls(Principal p, Model model) {
-        if (p != null) {
-            String username = p.getName();
-            User userDtls = userService.getUserByUsername(username);
-            model.addAttribute("user", userDtls);
-        }
-    }
-
     @GetMapping("/login")
     public String login() {
         return "login";
@@ -78,8 +70,95 @@ public class AuthController {
     @Autowired
     private com.healthTracker.implementation.service.HealthTipService healthTipService;
 
+    @Autowired
+    private com.healthTracker.implementation.service.DailyLogService dailyLogService;
+    @Autowired
+    private com.healthTracker.implementation.service.WorkoutService workoutService;
+    @Autowired
+    private com.healthTracker.implementation.service.MealService mealService;
+
     @GetMapping("/welcome")
-    public String welcome(Model model) {
+    public String welcome(Model model, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+        User user = userService.getUserByUsername(principal.getName());
+
+        // Today's Date
+        java.time.LocalDate today = java.time.LocalDate.now();
+
+        // Fetch Data
+        List<com.healthTracker.implementation.model.Meal> meals = mealService.findMealsByUser(user);
+        List<com.healthTracker.implementation.model.Workout> workouts = workoutService.findWorkoutsByUser(user);
+        List<com.healthTracker.implementation.model.DailyLog> logs = dailyLogService.findDailyLogsByUser(user);
+
+        // Calculate Today's Summary
+        int caloriesEaten = meals.stream()
+                .filter(m -> m.getDate().equals(today))
+                .mapToInt(com.healthTracker.implementation.model.Meal::getCalories)
+                .sum();
+
+        int caloriesBurned = workouts.stream()
+                .filter(w -> w.getDate().equals(today))
+                .mapToInt(com.healthTracker.implementation.model.Workout::getCalories)
+                .sum();
+
+        int steps = logs.stream()
+                .filter(l -> l.getDate().equals(today))
+                .mapToInt(com.healthTracker.implementation.model.DailyLog::getSteps)
+                .sum();
+
+        double sleep = logs.stream()
+                .filter(l -> l.getDate().equals(today))
+                .mapToDouble(com.healthTracker.implementation.model.DailyLog::getSleepDuration)
+                .sum();
+
+        model.addAttribute("caloriesEaten", caloriesEaten);
+        model.addAttribute("caloriesBurned", caloriesBurned);
+        model.addAttribute("steps", steps);
+        model.addAttribute("sleep", sleep);
+
+        // Calculate Weekly Summary (Last 7 days)
+        java.util.List<String> datesHistory = new java.util.ArrayList<>();
+        java.util.List<Integer> caloriesHistory = new java.util.ArrayList<>();
+        java.util.List<Integer> stepsHistory = new java.util.ArrayList<>();
+
+        for (int i = 6; i >= 0; i--) {
+            java.time.LocalDate date = today.minusDays(i);
+            datesHistory.add(date.format(java.time.format.DateTimeFormatter.ofPattern("MMM dd")));
+
+            int dailyCal = meals.stream()
+                    .filter(m -> m.getDate().equals(date))
+                    .mapToInt(com.healthTracker.implementation.model.Meal::getCalories)
+                    .sum();
+            caloriesHistory.add(dailyCal);
+
+            int dailySteps = logs.stream()
+                    .filter(l -> l.getDate().equals(date))
+                    .mapToInt(com.healthTracker.implementation.model.DailyLog::getSteps)
+                    .sum();
+            stepsHistory.add(dailySteps);
+        }
+
+        model.addAttribute("datesHistory", datesHistory);
+        model.addAttribute("caloriesHistory", caloriesHistory);
+        model.addAttribute("stepsHistory", stepsHistory);
+
+        // Goal Tracking
+        Integer dailyStepGoal = user.getDailyStepGoal() != null ? user.getDailyStepGoal() : 10000;
+        Integer weeklyWorkoutGoal = user.getWeeklyWorkoutGoal() != null ? user.getWeeklyWorkoutGoal() : 5;
+
+        // Calculate Workouts in Last 7 Days (Unique Days)
+        long weeklyWorkoutsCompleted = workouts.stream()
+                .filter(w -> w.getDate().isAfter(today.minusDays(7)) || w.getDate().equals(today.minusDays(7)))
+                .map(com.healthTracker.implementation.model.Workout::getDate)
+                .distinct()
+                .count();
+
+        model.addAttribute("dailyStepGoal", dailyStepGoal);
+        model.addAttribute("weeklyWorkoutGoal", weeklyWorkoutGoal);
+        model.addAttribute("weeklyWorkoutsCompleted", weeklyWorkoutsCompleted);
+
         model.addAttribute("healthTip", healthTipService.getDailyTip());
         return "welcome";
     }
@@ -93,5 +172,110 @@ public class AuthController {
     public String updateProfile(@ModelAttribute User user) {
         userService.updateUserProfile(user);
         return "redirect:/profile";
+    }
+
+    @PostMapping("/update-goals")
+    public String updateGoals(@ModelAttribute User user) {
+        // We reuse updateUserProfile as it only updates non-null fields
+        userService.updateUserProfile(user);
+        return "redirect:/welcome";
+    }
+
+    @Autowired
+    private com.healthTracker.implementation.service.EmailService emailService;
+
+    @GetMapping("/forgot-password")
+    public String showForgotPasswordForm() {
+        return "forgot_password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String processForgotPassword(jakarta.servlet.http.HttpServletRequest request, Model model,
+            @org.springframework.web.bind.annotation.RequestParam("email") String userEmail,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        User user = userService.getUserByUsername(userEmail);
+        if (user == null) {
+            model.addAttribute("error", "We didn't find an account for that e-mail address.");
+            return "forgot_password";
+        }
+
+        try {
+            String otp = userService.createPasswordResetTokenForUser(user);
+
+            emailService.sendEmail(user.getUsername(), "Reset Password OTP",
+                    "Your One-Time Password (OTP) for password reset is: " + otp + "\nThis OTP is valid for 1 hour.");
+            redirectAttributes.addFlashAttribute("message",
+                    "We have sent an OTP to your email. Please enter it below.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("error", "Error processing request: " + e.getMessage());
+            return "forgot_password";
+        }
+
+        return "redirect:/verify-otp";
+    }
+
+    @GetMapping("/verify-otp")
+    public String showVerifyOtpForm() {
+        return "verify_otp";
+    }
+
+    @PostMapping("/verify-otp")
+    public String verifyOtp(@org.springframework.web.bind.annotation.RequestParam("otp") String otp, Model model,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        String validationResult = userService.validatePasswordResetToken(otp);
+        if (validationResult != null) {
+            model.addAttribute("error", "Invalid or expired OTP.");
+            return "verify_otp";
+        }
+        return "redirect:/reset-password?token=" + otp;
+    }
+
+    @GetMapping("/reset-password")
+    public String showResetPasswordForm(@org.springframework.web.bind.annotation.RequestParam("token") String token,
+            Model model) {
+        String result = userService.validatePasswordResetToken(token);
+        if (result != null) {
+            model.addAttribute("error", "Invalid or expired token. Please request a new password reset.");
+            return "reset_password"; // Show error on the page instead of redirecting to login
+        }
+        com.healthTracker.implementation.dto.PasswordResetDto passwordResetDto = new com.healthTracker.implementation.dto.PasswordResetDto();
+        passwordResetDto.setToken(token);
+        model.addAttribute("passwordResetDto", passwordResetDto);
+        return "reset_password";
+    }
+
+    @PostMapping("/reset-password")
+    public String processResetPassword(
+            @Valid @ModelAttribute("passwordResetDto") com.healthTracker.implementation.dto.PasswordResetDto passwordResetDto,
+            org.springframework.validation.BindingResult result,
+            Model model,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+
+        if (result.hasErrors()) {
+            return "reset_password";
+        }
+
+        if (!passwordResetDto.getPassword().equals(passwordResetDto.getConfirmPassword())) {
+            model.addAttribute("error", "Passwords do not match!");
+            return "reset_password";
+        }
+
+        String token = passwordResetDto.getToken();
+        String validationResult = userService.validatePasswordResetToken(token);
+        if (validationResult != null) {
+            model.addAttribute("error", "Invalid or expired token.");
+            return "redirect:/login";
+        }
+
+        User user = userService.getUserByPasswordResetToken(token);
+        if (user != null) {
+            userService.changeUserPassword(user, passwordResetDto.getPassword());
+            redirectAttributes.addFlashAttribute("success", "Password reset successfully! You can now login.");
+            return "redirect:/login";
+        } else {
+            model.addAttribute("error", "User not found.");
+            return "reset_password";
+        }
     }
 }
