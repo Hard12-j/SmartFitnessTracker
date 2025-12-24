@@ -205,9 +205,42 @@
                         <label class="form-label">Height (cm)</label>
                         <input type="text" name="height" class="form-control" th:value="${user.height}">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" th:if="${user.role != 'TRAINER'}">
                         <label class="form-label">Fitness Goals</label>
                         <input type="text" name="goals" class="form-control" th:value="${user.goals}">
+                    </div>
+                </div>
+
+                <!-- Trainer Specific Section -->
+                <div th:if="${user.role == 'TRAINER'}"
+                    style="margin-top: 2rem; border-top: 1px solid #cbd5e1; padding-top: 1rem;">
+                    <h3 style="color: #242d3f; margin-bottom: 1rem;">Trainer Profile</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Specialization</label>
+                            <input type="text" name="specialization" class="form-control"
+                                th:value="${user.specialization}" placeholder="e.g. Muscle Gain, Yoga">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Location</label>
+                            <input type="text" name="trainerLocation" class="form-control"
+                                th:value="${user.trainerLocation}" placeholder="e.g. New York, Remote">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Experience (Years)</label>
+                            <input type="text" name="experience" class="form-control" th:value="${user.experience}"
+                                placeholder="e.g. 5+ Years">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Contact Number</label>
+                            <input type="text" name="contactNo" class="form-control" th:value="${user.contactNo}"
+                                placeholder="Enter contact number">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Availability</label>
+                            <input type="text" name="availability" class="form-control" th:value="${user.availability}"
+                                placeholder="e.g. Mon-Fri 9am-5pm">
+                        </div>
                     </div>
                 </div>
 

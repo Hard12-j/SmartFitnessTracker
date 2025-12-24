@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Blog - WellNest</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/index.html" class="logo">WellNest</a>
+            <ul>
+                <li><a href="/index.html">Home</a></li>
+                <li><a href="/blogs.html">Health Blog</a></li>
+                <li><a href="/trainer-matching.html">Find Trainer</a></li>
+                <li><a href="/profile.html">My Profile</a></li>
+                <li><span id="current-user"></span></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="flex-between mb-4">
+            <h1>Health Blog</h1>
+            <a href="blog-create.html" class="btn btn-primary">+ Create New Post</a>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <label class="form-label">Filter by Category:</label>
+                <select id="category-filter" class="form-control" onchange="filterBlogs()">
+                    <option value="">All Categories</option>
+                    <option value="NUTRITION">Nutrition</option>
+                    <option value="WORKOUT">Workout</option>
+                    <option value="MENTAL_HEALTH">Mental Health</option>
+                    <option value="TIPS">Tips</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="blog-list" class="blog-list"></div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        function filterBlogs() {
+            const category = document.getElementById('category-filter').value;
+            loadBlogs(category);
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadBlogs();
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                document.getElementById('current-user').textContent = currentUser;
+            }
+        });
+    </script>
+</body>
+</html>
+

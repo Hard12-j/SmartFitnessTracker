@@ -35,10 +35,6 @@ public class HealthTipService {
     }
 
     public HealthTip getDailyTip() {
-        // For a true "daily" tip, we could seed Random with the date,
-        // but for a dynamic dashboard feeling, a random tip on reload is often more
-        // engaging.
-        // Let's go with random for now as per plan.
         int index = random.nextInt(tips.size());
         return tips.get(index);
     }

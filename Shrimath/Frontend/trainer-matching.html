@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Your Trainer - WellNest</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/index.html" class="logo">WellNest</a>
+            <ul>
+                <li><a href="/index.html">Home</a></li>
+                <li><a href="/blogs.html">Health Blog</a></li>
+                <li><a href="/trainer-matching.html">Find Trainer</a></li>
+                <li><a href="/profile.html">My Profile</a></li>
+                <li><span id="current-user"></span></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="hero">
+            <h1>Find Your Perfect Trainer</h1>
+            <p>Get matched with trainers based on your fitness goals and preferences</p>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="flex-between">
+                    <div>
+                        <h3>Smart Trainer Matching</h3>
+                        <p>Our algorithm matches you with trainers based on your fitness profile.</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary" onclick="findMatchingTrainers()">Find My Match</button>
+                        <a href="profile.html" class="btn btn-outline">Update Profile</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">All Trainers</h2>
+                <button class="btn btn-outline" onclick="loadTrainers()">Refresh</button>
+            </div>
+            <div class="card-body">
+                <div id="trainer-list" class="trainer-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTrainers();
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                document.getElementById('current-user').textContent = currentUser;
+            }
+        });
+    </script>
+</body>
+</html>
+

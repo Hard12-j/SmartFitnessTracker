@@ -187,6 +187,10 @@
                         <input type="number" step="0.1" id="sleepDuration" th:field="*{sleepDuration}" required>
                     </div>
                     <div class="form-group">
+                        <label for="steps">Steps Count</label>
+                        <input type="number" id="steps" th:field="*{steps}" required>
+                    </div>
+                    <div class="form-group">
                         <label for="notes">Notes</label>
                         <textarea id="notes" th:field="*{notes}"
                             placeholder="Sleep quality, hydration habits, etc."></textarea>
@@ -211,6 +215,7 @@
                             <th>Date</th>
                             <th>Water (L)</th>
                             <th>Sleep (h)</th>
+                            <th>Steps</th>
                             <th>Notes</th>
                         </tr>
                     </thead>
@@ -219,6 +224,7 @@
                             <td th:text="${log.date}"></td>
                             <td th:text="${log.waterIntake}"></td>
                             <td th:text="${log.sleepDuration}"></td>
+                            <td th:text="${log.steps}"></td>
                             <td th:text="${log.notes}"></td>
                         </tr>
                     </tbody>

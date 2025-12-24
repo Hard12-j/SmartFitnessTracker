@@ -25,4 +25,15 @@ public class User {
     private String weight;
     private String height;
     private String goals;
+
+    private Integer dailyStepGoal = 10000;
+    private Integer weeklyWorkoutGoal = 5;
+
+    // Trainer specific fields
+    private String specialization;
+    private String trainerLocation;
+    private String availability;
+    private String experience;
+    private String contactNo;
+    private boolean isVerifiedTrainer = false;
 }

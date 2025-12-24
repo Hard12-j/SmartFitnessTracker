@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Fitness Profile - WellNest</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/index.html" class="logo">WellNest</a>
+            <ul>
+                <li><a href="/index.html">Home</a></li>
+                <li><a href="/blogs.html">Health Blog</a></li>
+                <li><a href="/trainer-matching.html">Find Trainer</a></li>
+                <li><a href="/profile.html">My Profile</a></li>
+                <li><span id="current-user"></span></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="profile-form">
+            <h1 class="text-center mb-4">My Fitness Profile</h1>
+            <p class="text-center mb-4" style="color: var(--text-light);">
+                Complete your profile to get personalized trainer recommendations
+            </p>
+            
+            <div class="form-group">
+                <label class="form-label" for="user-name">Your Name *</label>
+                <input type="text" id="user-name" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="fitness-goal">Fitness Goal *</label>
+                <select id="fitness-goal" class="form-control" required>
+                    <option value="">Select Your Goal</option>
+                    <option value="WEIGHT_LOSS">Weight Loss</option>
+                    <option value="MUSCLE_GAIN">Muscle Gain</option>
+                    <option value="GENERAL_FITNESS">General Fitness</option>
+                    <option value="ENDURANCE">Endurance Training</option>
+                    <option value="FLEXIBILITY">Flexibility & Mobility</option>
+                    <option value="STRENGTH">Strength Building</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="workout-type">Preferred Workout Type *</label>
+                <select id="workout-type" class="form-control" required>
+                    <option value="">Select Workout Type</option>
+                    <option value="CARDIO">Cardio</option>
+                    <option value="STRENGTH">Strength Training</option>
+                    <option value="YOGA">Yoga</option>
+                    <option value="HIIT">HIIT</option>
+                    <option value="FUNCTIONAL_TRAINING">Functional Training</option>
+                    <option value="PILATES">Pilates</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="age">Age</label>
+                <input type="number" id="age" class="form-control" min="13" max="100">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="experience-level">Experience Level</label>
+                <select id="experience-level" class="form-control">
+                    <option value="">Select Experience Level</option>
+                    <option value="BEGINNER">Beginner</option>
+                    <option value="INTERMEDIATE">Intermediate</option>
+                    <option value="ADVANCED">Advanced</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="training-style">Preferred Training Style</label>
+                <input type="text" id="training-style" class="form-control" placeholder="e.g., One-on-one, Group classes">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="location">Location</label>
+                <input type="text" id="location" class="form-control" placeholder="City, State">
+            </div>
+            
+            <div class="flex gap-2">
+                <button class="btn btn-primary" onclick="saveProfile()">Save Profile</button>
+                <a href="trainer-matching.html" class="btn btn-outline">Find Trainers</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                document.getElementById('user-name').value = currentUser;
+                document.getElementById('current-user').textContent = currentUser;
+                
+                // Try to load existing profile
+                fetch(`http://localhost:8080/api/trainers/profiles/${currentUser}`)
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        }
+                    })
+                    .then(profile => {
+                        if (profile) {
+                            document.getElementById('fitness-goal').value = profile.fitnessGoal || '';
+                            document.getElementById('workout-type').value = profile.preferredWorkoutType || '';
+                            document.getElementById('age').value = profile.age || '';
+                            document.getElementById('experience-level').value = profile.experienceLevel || '';
+                            document.getElementById('training-style').value = profile.preferredTrainingStyle || '';
+                            document.getElementById('location').value = profile.location || '';
+                        }
+                    })
+                    .catch(error => console.log('No existing profile'));
+            }
+        });
+    </script>
+</body>
+</html>
+
