@@ -8,11 +8,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class TrainerMatchingController {
@@ -48,5 +50,19 @@ public class TrainerMatchingController {
 
         List<User> recommended = trainerService.getRecommendedTrainers(userGoal);
         return ResponseEntity.ok(recommended);
+    }
+
+    @PostMapping("/api/trainers/book")
+    @ResponseBody
+    public ResponseEntity<?> bookTrainer(Principal principal, @RequestParam Long trainerId) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        User user = userService.getUserByUsername(principal.getName());
+        user.setAssignedTrainerId(trainerId);
+        userService.updateUserProfile(user);
+
+        return ResponseEntity.ok().body(Map.of("message", "Trainer booked successfully!"));
     }
 }

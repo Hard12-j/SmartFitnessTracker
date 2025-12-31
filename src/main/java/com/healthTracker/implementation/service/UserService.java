@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.healthTracker.implementation.model.User;
 import com.healthTracker.implementation.repository.UserRepository;
 import org.springframework.util.ObjectUtils;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -39,6 +40,8 @@ public class UserService {
                 dbUser.setDailyStepGoal(user.getDailyStepGoal());
             if (user.getWeeklyWorkoutGoal() != null)
                 dbUser.setWeeklyWorkoutGoal(user.getWeeklyWorkoutGoal());
+            if (user.getProfileImageUrl() != null)
+                dbUser.setProfileImageUrl(user.getProfileImageUrl());
 
             // Update trainer fields if they are provided
             if (user.getSpecialization() != null)
@@ -99,5 +102,13 @@ public class UserService {
     public void changeUserPassword(User user, String password) {
         user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElse(null);
     }
 }

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Assign Plan - Health Tracker</title>
+    <style>
+        :root {
+            --primary-color: #4F46E5;
+            --bg-color: #242d3f;
+            --card-bg: #d4e7f7;
+            --text-dark: #1e293b;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            color: white;
+        }
+
+        .navbar {
+            background-color: var(--card-bg);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .form-section {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 2rem;
+            color: var(--text-dark);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+            box-sizing: border-box;
+        }
+
+        .btn-submit {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+        }
+
+        .plan-list {
+            margin-top: 1rem;
+        }
+
+        .plan-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="/trainer/dashboard"
+                style="color: var(--primary-color); text-decoration: none; font-weight: bold;">← Back to Clients</a>
+            <a href="/blogs" style="color: var(--text-dark); text-decoration: none; margin-left: 1rem;">Blogs</a>
+            <a href="/profile" style="color: var(--text-dark); text-decoration: none; margin-left: 1rem;">My Profile</a>
+        </div>
+        <h2 th:text="'Assigning Plan for ' + ${user.first}" style="color: var(--text-dark); margin: 0;">Assign Plan</h2>
+        <a href="/logout" style="color: #ef4444; text-decoration: none;">Logout</a>
+    </nav>
+
+    <div class="container">
+        <!-- Diet Plan Section -->
+        <div class="form-section">
+            <h3>Add Diet Entry</h3>
+            <form action="/trainer/assign-diet" method="post">
+                <input type="hidden" name="userId" th:value="${user.id}">
+                <div class="form-group">
+                    <label class="form-label">Day of Week</label>
+                    <select name="dayOfWeek" class="form-control">
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Meal Name</label>
+                    <input type="text" name="mealName" class="form-control" placeholder="e.g. Oatmeal with Fruits"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Calories</label>
+                    <input type="number" name="calories" class="form-control" placeholder="e.g. 450" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea name="description" class="form-control" rows="2"></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Add to Diet Plan</button>
+            </form>
+
+            <div class="plan-list">
+                <h4>Existing Diet Entries</h4>
+                <div th:each="diet : ${dietPlans}" class="plan-item">
+                    <strong th:text="${diet.dayOfWeek} + ': ' + ${diet.mealName}"></strong>
+                    <span th:text="'(' + ${diet.calories} + ' cal)'"></span>
+                    <p th:text="${diet.description}" style="margin: 0.25rem 0 0; font-size: 0.9rem; color: #64748b;">
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exercise Plan Section -->
+        <div class="form-section">
+            <h3>Add Exercise Entry</h3>
+            <form action="/trainer/assign-exercise" method="post">
+                <input type="hidden" name="userId" th:value="${user.id}">
+                <div class="form-group">
+                    <label class="form-label">Day of Week</label>
+                    <select name="dayOfWeek" class="form-control">
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Exercise Name</label>
+                    <input type="text" name="exerciseName" class="form-control" placeholder="e.g. Bench Press" required>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Sets</label>
+                        <input type="number" name="sets" class="form-control" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Reps</label>
+                        <input type="number" name="reps" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea name="description" class="form-control" rows="2"></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Add to Workout Plan</button>
+            </form>
+
+            <div class="plan-list">
+                <h4>Existing Workout Entries</h4>
+                <div th:each="ex : ${exercisePlans}" class="plan-item">
+                    <strong th:text="${ex.dayOfWeek} + ': ' + ${ex.exerciseName}"></strong>
+                    <span th:text="${ex.sets} + ' sets x ' + ${ex.reps} + ' reps'"></span>
+                    <p th:text="${ex.description}" style="margin: 0.25rem 0 0; font-size: 0.9rem; color: #64748b;"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

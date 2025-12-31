@@ -46,7 +46,19 @@ public class BlogController {
     }
 
     @PostMapping
-    public ResponseEntity<BlogDTO> createBlog(@RequestBody BlogDTO blogDTO) {
+    public ResponseEntity<BlogDTO> createBlog(@RequestBody BlogDTO blogDTO, java.security.Principal principal) {
+        if (principal == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        String currentUsername = principal.getName();
+        com.healthTracker.implementation.model.User user = userService.getUserByUsername(currentUsername);
+
+        blogDTO.setAuthorUsername(currentUsername);
+        blogDTO.setAuthorName(user.getFirst() + " " + user.getLast());
+        if (blogDTO.getAuthorType() == null) {
+            blogDTO.setAuthorType(user.getRole() != null ? user.getRole() : "USER");
+        }
+
         BlogDTO createdBlog = blogService.createBlog(blogDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdBlog);
     }
@@ -90,12 +102,7 @@ public class BlogController {
         if (principal == null)
             return false;
         String currentUsername = principal.getName();
-        com.healthTracker.implementation.model.User user = userService.getUserByUsername(currentUsername);
-
-        String fullName = user.getFirst() + " " + user.getLast();
-        boolean isAdmin = user.getRole() != null && user.getRole().equalsIgnoreCase("ADMIN");
-
-        return blog.getAuthorName().equals(fullName) || blog.getAuthorName().equals(currentUsername) || isAdmin;
+        return java.util.Objects.equals(blog.getAuthorUsername(), currentUsername);
     }
 
     @GetMapping("/{id}/comments")

@@ -16,6 +16,40 @@
             --accent-color: #10B981;
         }
 
+        /* Dropdown Styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--card-bg);
+            min-width: 160px;
+            box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            border-radius: 0.375rem;
+            top: 100%;
+        }
+
+        .dropdown-content a {
+            color: var(--text-secondary);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-weight: 400;
+        }
+
+        .dropdown-content a:hover {
+            background-color: rgba(79, 70, 229, 0.1);
+            color: var(--primary-color);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
         body {
             font-family: 'Outfit', 'Inter', sans-serif;
             background-color: var(--bg-color);
@@ -191,7 +225,15 @@
 <body>
     <nav class="navbar">
         <a href="/welcome" class="navbar-brand">HealthTracker</a>
-        <div class="nav-links" style="display:flex; gap: 2rem;">
+        <div class="nav-links" style="display:flex; gap: 2rem; align-items: center;">
+            <div class="dropdown">
+                <a href="#" class="nav-link" style="color:var(--text-dark); text-decoration:none;">Activity ▾</a>
+                <div class="dropdown-content">
+                    <a href="/workouts">Workouts</a>
+                    <a href="/meals">Meals</a>
+                    <a href="/daily-logs">Daily Log</a>
+                </div>
+            </div>
             <a href="/welcome" style="color:var(--text-dark); text-decoration:none;">Dashboard</a>
             <a href="/blogs" style="color:var(--text-dark); text-decoration:none;">Blogs</a>
             <a href="/logout" style="color:var(--danger-color); text-decoration:none;">Logout</a>
@@ -250,13 +292,16 @@
                             <div class="trainer-detail">
                                 <i class="bi bi-calendar-check"></i> ${trainer.availability || 'Available Now'}
                             </div>
-                            <div id="contact-info-${trainer.id}" class="trainer-detail" style="display: none; margin-top: 1rem; color: var(--primary-color); font-weight: 600;">
-                                <i class="bi bi-envelope"></i> ${trainer.username}<br>
+                            <div id="contact-info-${trainer.id}" class="trainer-detail" style="margin-top: 1rem; color: var(--primary-color); font-weight: 600;">
+                                <i class="bi bi-envelope"></i> ${trainer.username}
+                                </br>
                                 <i class="bi bi-telephone"></i> ${trainer.contactNo || 'N/A'}
                             </div>
-                            <button class="btn-book" onclick="showContact(${trainer.id})">
-                                Contact Details
-                            </button>
+                            <div class="booking-actions" style="margin-top: 1.5rem;">
+                                <button class="btn-book" onclick="bookTrainer(${trainer.id})">
+                                    Book Trainer
+                                </button>
+                            </div>
                         </div>
                     `;
                     grid.appendChild(card);
@@ -267,12 +312,22 @@
             }
         }
 
-        function showContact(trainerId) {
-            const info = document.getElementById(`contact-info-${trainerId}`);
-            if (info.style.display === 'none') {
-                info.style.display = 'block';
-            } else {
-                info.style.display = 'none';
+        async function bookTrainer(trainerId) {
+            if (!confirm('Are you sure you want to book this trainer?')) return;
+
+            try {
+                const response = await fetch(`/api/trainers/book?trainerId=${trainerId}`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    alert('Trainer booked successfully! You can now start your fitness journey together.');
+                    window.location.reload();
+                } else {
+                    alert('Failed to book trainer. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred.');
             }
         }
 

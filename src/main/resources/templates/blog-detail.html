@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <title>Blog Detail - Health Tracker</title>
@@ -12,6 +11,40 @@
             --text-main: #d4e7f7;
             --text-secondary: #6B7280;
             --danger-color: #EF4444;
+        }
+
+        /* Dropdown Styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--card-bg);
+            min-width: 160px;
+            box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            border-radius: 0.375rem;
+            top: 100%;
+        }
+
+        .dropdown-content a {
+            color: var(--text-secondary);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-weight: 400;
+        }
+
+        .dropdown-content a:hover {
+            background-color: rgba(79, 70, 229, 0.1);
+            color: var(--primary-color);
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
         }
 
         body {
@@ -230,7 +263,18 @@
     <nav class="navbar">
         <a href="/welcome" class="navbar-brand">HealthTracker</a>
         <div class="nav-links">
-            <a href="/welcome" class="nav-link">Dashboard</a>
+            <div class="dropdown" sec:authorize="hasRole('USER')">
+                <a href="#" class="nav-link">Activity ▾</a>
+                <div class="dropdown-content">
+                    <a href="/workouts">Workouts</a>
+                    <a href="/meals">Meals</a>
+                    <a href="/daily-logs">Daily Log</a>
+                </div>
+            </div>
+            <a href="/bmi" class="nav-link" sec:authorize="hasRole('USER')">BMI Calculator</a>
+            <a href="/trainer-matching" class="nav-link" sec:authorize="hasRole('USER')">Trainer Matching</a>
+            <a th:href="${#authorization.expression('hasRole(''TRAINER'')') ? '/trainer/dashboard' : '/welcome'}"
+                class="nav-link">Dashboard</a>
             <a href="/blogs" class="nav-link">Blogs</a>
             <a href="/profile" class="nav-link">My Profile</a>
             <a href="/logout" class="btn-logout">Logout</a>
@@ -317,7 +361,8 @@
                 }
 
 
-                if (blog.authorName === currentUser || blog.authorName === currentUsername || isAdmin) {
+                const isAuthor = blog.authorUsername === currentUsername;
+                if (isAuthor) {
                     document.getElementById('author-actions').style.display = 'block';
                     document.getElementById('edit-btn').href = `/blogs/edit?id=${blog.id}`;
                 }
