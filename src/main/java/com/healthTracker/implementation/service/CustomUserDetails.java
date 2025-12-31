@@ -9,9 +9,10 @@ import com.healthTracker.implementation.model.User;
 import com.healthTracker.implementation.repository.UserRepository;
 
 @Service
-public class CustomUserDetails implements UserDetailsService{
-	
+public class CustomUserDetails implements UserDetailsService {
+
 	private UserRepository userRepository;
+
 	public CustomUserDetails(UserRepository userRepository) {
 		this.userRepository = userRepository;
 	}
@@ -20,10 +21,11 @@ public class CustomUserDetails implements UserDetailsService{
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		// TODO Auto-generated method stub
 		User user = userRepository.findByUsername(username);
-		if(user == null) {
+		if (user == null) {
 			throw new UsernameNotFoundException("user not found with given username");
 		}
-		return org.springframework.security.core.userdetails.User.withUsername(user.getUsername()).password(user.getPassword()).roles(user.getRole()).build();
+		return org.springframework.security.core.userdetails.User.withUsername(user.getUsername())
+				.password(user.getPassword()).roles(user.getRole().toUpperCase()).build();
 	}
 
 }

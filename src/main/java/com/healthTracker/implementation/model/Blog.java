@@ -26,6 +26,9 @@ public class Blog {
     private String authorName;
 
     @Column(nullable = false)
+    private String authorUsername;
+
+    @Column(nullable = false)
     private String authorType; // USER, TRAINER, ADMIN
 
     @Column(nullable = false, updatable = false)
@@ -51,14 +54,15 @@ public class Blog {
     public Blog() {
     }
 
-    public Blog(Long id, String title, String category, String content, String authorName, String authorType,
-            LocalDateTime publishedDate, String imageUrl, String status, LocalDateTime createdAt,
+    public Blog(Long id, String title, String category, String content, String authorName, String authorUsername,
+            String authorType, LocalDateTime publishedDate, String imageUrl, String status, LocalDateTime createdAt,
             LocalDateTime updatedAt, List<BlogComment> comments, List<BlogLike> likes) {
         this.id = id;
         this.title = title;
         this.category = category;
         this.content = content;
         this.authorName = authorName;
+        this.authorUsername = authorUsername;
         this.authorType = authorType;
         this.publishedDate = publishedDate;
         this.imageUrl = imageUrl;
@@ -107,6 +111,14 @@ public class Blog {
 
     public void setAuthorName(String authorName) {
         this.authorName = authorName;
+    }
+
+    public String getAuthorUsername() {
+        return authorUsername;
+    }
+
+    public void setAuthorUsername(String authorUsername) {
+        this.authorUsername = authorUsername;
     }
 
     public String getAuthorType() {
@@ -181,6 +193,7 @@ public class Blog {
                 ", category='" + category + '\'' +
                 ", content='" + content + '\'' +
                 ", authorName='" + authorName + '\'' +
+                ", authorUsername='" + authorUsername + '\'' +
                 ", authorType='" + authorType + '\'' +
                 ", publishedDate=" + publishedDate +
                 ", imageUrl='" + imageUrl + '\'' +

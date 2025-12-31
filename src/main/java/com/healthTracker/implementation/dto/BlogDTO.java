@@ -8,6 +8,7 @@ public class BlogDTO {
     private String category;
     private String content;
     private String authorName;
+    private String authorUsername;
     private String authorType;
     private LocalDateTime publishedDate;
     private String imageUrl;
@@ -18,13 +19,15 @@ public class BlogDTO {
     public BlogDTO() {
     }
 
-    public BlogDTO(Long id, String title, String category, String content, String authorName, String authorType,
-            LocalDateTime publishedDate, String imageUrl, String status, long likesCount, long commentsCount) {
+    public BlogDTO(Long id, String title, String category, String content, String authorName, String authorUsername,
+            String authorType, LocalDateTime publishedDate, String imageUrl, String status, long likesCount,
+            long commentsCount) {
         this.id = id;
         this.title = title;
         this.category = category;
         this.content = content;
         this.authorName = authorName;
+        this.authorUsername = authorUsername;
         this.authorType = authorType;
         this.publishedDate = publishedDate;
         this.imageUrl = imageUrl;
@@ -71,6 +74,14 @@ public class BlogDTO {
 
     public void setAuthorName(String authorName) {
         this.authorName = authorName;
+    }
+
+    public String getAuthorUsername() {
+        return authorUsername;
+    }
+
+    public void setAuthorUsername(String authorUsername) {
+        this.authorUsername = authorUsername;
     }
 
     public String getAuthorType() {
@@ -129,6 +140,7 @@ public class BlogDTO {
                 ", category='" + category + '\'' +
                 ", content='" + content + '\'' +
                 ", authorName='" + authorName + '\'' +
+                ", authorUsername='" + authorUsername + '\'' +
                 ", authorType='" + authorType + '\'' +
                 ", publishedDate=" + publishedDate +
                 ", imageUrl='" + imageUrl + '\'' +

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <title>Dashboard - Health Tracker</title>
@@ -217,7 +217,7 @@
     <nav class="navbar">
         <a href="#" class="navbar-brand">HealthTracker</a>
         <div class="nav-links">
-            <div class="dropdown">
+            <div class="dropdown" sec:authorize="hasRole('USER')">
                 <a href="#" class="nav-link">Activity ▾</a>
                 <div class="dropdown-content">
                     <a href="/workouts">Workouts</a>
@@ -225,9 +225,11 @@
                     <a href="/daily-logs">Daily Log</a>
                 </div>
             </div>
-            <a href="/bmi" class="nav-link">BMI Calculator</a>
-            <a href="/trainer-matching" class="nav-link">Trainer Matching</a>
+            <a href="/bmi" class="nav-link" sec:authorize="hasRole('USER')">BMI Calculator</a>
+            <a href="/trainer-matching" class="nav-link" sec:authorize="hasRole('USER')">Trainer Matching</a>
             <a href="/blogs" class="nav-link">Blogs</a>
+            <a href="/trainer/dashboard" class="nav-link" sec:authorize="hasRole('TRAINER')"
+                style="color: var(--primary-color); font-weight: 700;">Trainer Dashboard</a>
             <a href="/profile" class="nav-link">My Profile</a>
             <a href="/logout" class="btn-logout">Logout</a>
         </div>
@@ -281,13 +283,50 @@
         </div>
         <br>
         <br>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+
+        <!-- Trainer Assigned Plans (For Users) -->
+        <div th:if="${#authorization.expression('hasRole(''USER'')')} and (!${#lists.isEmpty(assignedDiet)} or !${#lists.isEmpty(assignedExercises)})"
+            style="margin-bottom: 3rem;">
+            <h2 class="section-title" style="margin-bottom: 1.5rem;">Coach's Recommendations</h2>
+            <div class="dashboard-grid">
+                <!-- Assigned Diet -->
+                <div class="card" th:if="!${#lists.isEmpty(assignedDiet)}" style="text-align: left;">
+                    <h3 class="card-title" style="color: #242d3f;">Diet Plan</h3>
+                    <div th:each="diet : ${assignedDiet}"
+                        style="margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <div style="display: flex; justify-content: space-between; color : #242d3f;">
+                            <strong th:text="${diet.dayOfWeek} + ': ' + ${diet.mealName}"></strong>
+                            <small th:text="${diet.calories} + ' cal'" style="color: #242d3f;"></small>
+                        </div>
+                        <p th:text="${diet.description}" style="font-size: 0.85rem; margin: 0.25rem 0; opacity: 0.8;color : #242d3f;">
+                        </p>
+                    </div>
+                </div>
+                <!-- Assigned Exercises -->
+                <div class="card" th:if="!${#lists.isEmpty(assignedExercises)}" style="text-align: left;">
+                    <h3 class="card-title" style="color: #242d3f;">Workout Plan</h3>
+                    <div th:each="ex : ${assignedExercises}"
+                        style="margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <div style="display: flex; justify-content: space-between;color: #242d3f;">
+                            <strong th:text="${ex.dayOfWeek} + ': ' + ${ex.exerciseName}"></strong>
+                            <small th:text="${ex.sets} + 'x' + ${ex.reps}" style="color: #242d3f;"></small>
+                        </div>
+                        <p th:text="${ex.description}" style="font-size: 0.85rem; margin: 0.25rem 0; opacity: 0.8;color : #242d3f;"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+        <br>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;"
+            sec:authorize="hasRole('USER')">
             <h2 class="section-title" style="margin-bottom: 0;">Goals</h2>
             <button onclick="openGoalModal()" class="btn-card" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Set
                 Goals</button>
         </div>
 
-        <div class="dashboard-grid" style="margin-bottom: 3rem;">
+        <div class="dashboard-grid" style="margin-bottom: 3rem;" sec:authorize="hasRole('USER')">
             <!-- Daily Steps Goal -->
             <div class="card" style="text-align: left;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
@@ -589,9 +628,11 @@
     </div>
 
     <script th:inline="javascript">
+        /*[+
         const chartDates = [[${ datesHistory }]];
         const chartCalories = [[${ caloriesHistory }]];
         const chartSteps = [[${ stepsHistory }]];
+        +]*/
 
         // Calories Chart
         new Chart(document.getElementById('caloriesChart'), {

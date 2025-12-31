@@ -40,8 +40,16 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(request -> request
-						.requestMatchers("/register", "/login", "/forgot-password", "/reset-password", "/verify-otp")
+						.requestMatchers("/register", "/login", "/forgot-password", "/reset-password", "/verify-otp",
+								"/uploads/**", "/css/**", "/js/**", "/images/**")
 						.permitAll()
+						.requestMatchers("/welcome", "/profile", "/update-profile", "/update-goals", "/blogs/**",
+								"/api/blogs/**")
+						.hasAnyRole("USER", "TRAINER")
+						.requestMatchers("/trainer/**").hasRole("TRAINER")
+						.requestMatchers("/workouts/**", "/meals/**", "/daily-logs/**", "/bmi/**", "/calculate-bmi/**",
+								"/trainer-matching/**", "/api/trainers/match/**", "/api/trainers/book")
+						.hasRole("USER")
 						.anyRequest().authenticated())
 				.formLogin(form -> form.loginPage("/login").loginProcessingUrl("/login")
 						.failureHandler(customAuthenticationFailureHandler).defaultSuccessUrl("/welcome", true)

@@ -76,6 +76,8 @@ public class AuthController {
     private com.healthTracker.implementation.service.WorkoutService workoutService;
     @Autowired
     private com.healthTracker.implementation.service.MealService mealService;
+    @Autowired
+    private com.healthTracker.implementation.service.PlanService planService;
 
     @GetMapping("/welcome")
     public String welcome(Model model, Principal principal) {
@@ -83,6 +85,10 @@ public class AuthController {
             return "redirect:/login";
         }
         User user = userService.getUserByUsername(principal.getName());
+
+        if ("TRAINER".equalsIgnoreCase(user.getRole())) {
+            return "redirect:/trainer/dashboard";
+        }
 
         // Today's Date
         java.time.LocalDate today = java.time.LocalDate.now();
@@ -159,6 +165,10 @@ public class AuthController {
         model.addAttribute("weeklyWorkoutGoal", weeklyWorkoutGoal);
         model.addAttribute("weeklyWorkoutsCompleted", weeklyWorkoutsCompleted);
 
+        // Assigned Plans
+        model.addAttribute("assignedDiet", planService.getDietPlansForUser(user.getId()));
+        model.addAttribute("assignedExercises", planService.getExercisePlansForUser(user.getId()));
+
         model.addAttribute("healthTip", healthTipService.getDailyTip());
         return "welcome";
     }
@@ -169,7 +179,25 @@ public class AuthController {
     }
 
     @PostMapping("/update-profile")
-    public String updateProfile(@ModelAttribute User user) {
+    public String updateProfile(@ModelAttribute User user,
+            @org.springframework.web.bind.annotation.RequestParam("profileImage") org.springframework.web.multipart.MultipartFile profileImage) {
+        if (profileImage != null && !profileImage.isEmpty()) {
+            try {
+                String fileName = user.getId() + "_" + profileImage.getOriginalFilename();
+                java.nio.file.Path uploadPath = java.nio.file.Paths.get("uploads/profile_images");
+                if (!java.nio.file.Files.exists(uploadPath)) {
+                    java.nio.file.Files.createDirectories(uploadPath);
+                }
+
+                try (java.io.InputStream inputStream = profileImage.getInputStream()) {
+                    java.nio.file.Path filePath = uploadPath.resolve(fileName);
+                    java.nio.file.Files.copy(inputStream, filePath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    user.setProfileImageUrl("/uploads/profile_images/" + fileName);
+                }
+            } catch (java.io.IOException e) {
+                e.printStackTrace();
+            }
+        }
         userService.updateUserProfile(user);
         return "redirect:/profile";
     }

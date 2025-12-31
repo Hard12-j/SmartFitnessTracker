@@ -52,6 +52,7 @@ public class BlogService {
         blog.setCategory(blogDTO.getCategory());
         blog.setContent(blogDTO.getContent());
         blog.setAuthorName(blogDTO.getAuthorName());
+        blog.setAuthorUsername(blogDTO.getAuthorUsername());
         blog.setAuthorType(blogDTO.getAuthorType());
         blog.setImageUrl(blogDTO.getImageUrl());
         blog.setStatus(blogDTO.getStatus() != null ? blogDTO.getStatus() : "PUBLISHED");
@@ -138,6 +139,7 @@ public class BlogService {
         dto.setCategory(blog.getCategory());
         dto.setContent(blog.getContent());
         dto.setAuthorName(blog.getAuthorName());
+        dto.setAuthorUsername(blog.getAuthorUsername());
         dto.setAuthorType(blog.getAuthorType());
         dto.setPublishedDate(blog.getPublishedDate());
         dto.setImageUrl(blog.getImageUrl());
