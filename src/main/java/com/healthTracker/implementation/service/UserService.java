@@ -40,6 +40,10 @@ public class UserService {
                 dbUser.setDailyStepGoal(user.getDailyStepGoal());
             if (user.getWeeklyWorkoutGoal() != null)
                 dbUser.setWeeklyWorkoutGoal(user.getWeeklyWorkoutGoal());
+            if (user.getWeightGoal() != null)
+                dbUser.setWeightGoal(user.getWeightGoal());
+            if (user.getWaterIntakeGoal() != null)
+                dbUser.setWaterIntakeGoal(user.getWaterIntakeGoal());
             if (user.getProfileImageUrl() != null)
                 dbUser.setProfileImageUrl(user.getProfileImageUrl());
 
