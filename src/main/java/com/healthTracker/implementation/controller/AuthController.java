@@ -126,29 +126,68 @@ public class AuthController {
 
         // Calculate Weekly Summary (Last 7 days)
         java.util.List<String> datesHistory = new java.util.ArrayList<>();
-        java.util.List<Integer> caloriesHistory = new java.util.ArrayList<>();
+        java.util.List<Integer> caloriesEatenHistory = new java.util.ArrayList<>();
+        java.util.List<Integer> caloriesBurnedHistory = new java.util.ArrayList<>();
         java.util.List<Integer> stepsHistory = new java.util.ArrayList<>();
+        java.util.List<Long> workoutFrequencyHistory = new java.util.ArrayList<>();
+        java.util.List<Integer> workoutDurationHistory = new java.util.ArrayList<>();
+        java.util.List<Double> waterIntakeHistory = new java.util.ArrayList<>();
+        java.util.List<Double> sleepHistory = new java.util.ArrayList<>();
 
         for (int i = 6; i >= 0; i--) {
             java.time.LocalDate date = today.minusDays(i);
             datesHistory.add(date.format(java.time.format.DateTimeFormatter.ofPattern("MMM dd")));
 
-            int dailyCal = meals.stream()
+            int dailyCalEaten = meals.stream()
                     .filter(m -> m.getDate().equals(date))
                     .mapToInt(com.healthTracker.implementation.model.Meal::getCalories)
                     .sum();
-            caloriesHistory.add(dailyCal);
+            caloriesEatenHistory.add(dailyCalEaten);
+
+            int dailyCalBurned = workouts.stream()
+                    .filter(w -> w.getDate().equals(date))
+                    .mapToInt(com.healthTracker.implementation.model.Workout::getCalories)
+                    .sum();
+            caloriesBurnedHistory.add(dailyCalBurned);
 
             int dailySteps = logs.stream()
                     .filter(l -> l.getDate().equals(date))
                     .mapToInt(com.healthTracker.implementation.model.DailyLog::getSteps)
                     .sum();
             stepsHistory.add(dailySteps);
+
+            long frequency = workouts.stream()
+                    .filter(w -> w.getDate().equals(date))
+                    .count();
+            workoutFrequencyHistory.add(frequency);
+
+            int dailyDuration = workouts.stream()
+                    .filter(w -> w.getDate().equals(date))
+                    .mapToInt(com.healthTracker.implementation.model.Workout::getDuration)
+                    .sum();
+            workoutDurationHistory.add(dailyDuration);
+
+            double dailyWater = logs.stream()
+                    .filter(l -> l.getDate().equals(date))
+                    .mapToDouble(com.healthTracker.implementation.model.DailyLog::getWaterIntake)
+                    .sum();
+            waterIntakeHistory.add(dailyWater);
+
+            double dailySleep = logs.stream()
+                    .filter(l -> l.getDate().equals(date))
+                    .mapToDouble(com.healthTracker.implementation.model.DailyLog::getSleepDuration)
+                    .sum();
+            sleepHistory.add(dailySleep);
         }
 
         model.addAttribute("datesHistory", datesHistory);
-        model.addAttribute("caloriesHistory", caloriesHistory);
+        model.addAttribute("caloriesEatenHistory", caloriesEatenHistory);
+        model.addAttribute("caloriesBurnedHistory", caloriesBurnedHistory);
         model.addAttribute("stepsHistory", stepsHistory);
+        model.addAttribute("workoutFrequencyHistory", workoutFrequencyHistory);
+        model.addAttribute("workoutDurationHistory", workoutDurationHistory);
+        model.addAttribute("waterIntakeHistory", waterIntakeHistory);
+        model.addAttribute("sleepHistory", sleepHistory);
 
         // Goal Tracking
         Integer dailyStepGoal = user.getDailyStepGoal() != null ? user.getDailyStepGoal() : 10000;

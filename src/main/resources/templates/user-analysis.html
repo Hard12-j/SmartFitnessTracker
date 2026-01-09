@@ -168,15 +168,23 @@
         <h2 class="section-title">Weekly Summary</h2>
         <div class="dashboard-grid" style="margin-bottom: 3rem;">
             <div class="card">
-                <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">Calories Intake</div>
+                <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">Workout Frequency & Duration
+                </div>
                 <div class="chart-container">
-                    <canvas id="caloriesChart"></canvas>
+                    <canvas id="workoutChart"></canvas>
                 </div>
             </div>
             <div class="card">
-                <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">Steps Count</div>
+                <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">Calories Consumed & Burned</div>
                 <div class="chart-container">
-                    <canvas id="stepsChart"></canvas>
+                    <canvas id="caloriesCompareChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem;">Water Intake & Sleep Pattern
+                </div>
+                <div class="chart-container">
+                    <canvas id="healthPatternChart"></canvas>
                 </div>
             </div>
         </div>
@@ -187,9 +195,15 @@
             <div class="card" style="text-align: left;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                     <div style="font-size: 1.2rem; font-weight: 600;">Daily Steps Goal</div>
-                    <div style="font-weight: 600; color: var(--text-secondary); font-size: 0.9rem;">
-                        <span th:text="${#numbers.formatInteger(steps, 0, 'COMMA')}">0</span> / <span
-                            th:text="${#numbers.formatInteger(dailyStepGoal, 0, 'COMMA')}">10,000</span>
+                    <div style="text-align: right;">
+                        <div style="font-weight: 600; color: var(--text-secondary); font-size: 0.9rem;">
+                            <span th:text="${#numbers.formatInteger(steps, 0, 'COMMA')}">0</span> / <span
+                                th:text="${#numbers.formatInteger(dailyStepGoal, 0, 'COMMA')}">10,000</span>
+                        </div>
+                        <div style="color: var(--primary-color); font-size: 1.2rem; font-weight: 700;">
+                            <span
+                                th:text="${#numbers.formatInteger(T(java.lang.Math).min((steps * 100.0) / dailyStepGoal, 100.0), 1)}">0</span>%
+                        </div>
                     </div>
                 </div>
                 <div
@@ -204,9 +218,15 @@
             <div class="card" style="text-align: left;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                     <div style="font-size: 1.2rem; font-weight: 600;">Weekly Exercise Goal</div>
-                    <div style="font-weight: 600; color: var(--text-secondary); font-size: 0.9rem;">
-                        <span th:text="${weeklyWorkoutsCompleted}">0</span> / <span
-                            th:text="${weeklyWorkoutGoal}">5</span> Days
+                    <div style="text-align: right;">
+                        <div style="font-weight: 600; color: var(--text-secondary); font-size: 0.9rem;">
+                            <span th:text="${weeklyWorkoutsCompleted}">0</span> / <span
+                                th:text="${weeklyWorkoutGoal}">5</span> Days
+                        </div>
+                        <div style="color: var(--primary-color); font-size: 1.2rem; font-weight: 700;">
+                            <span
+                                th:text="${#numbers.formatInteger(T(java.lang.Math).min((weeklyWorkoutsCompleted * 100.0) / weeklyWorkoutGoal, 100.0), 1)}">0</span>%
+                        </div>
                     </div>
                 </div>
                 <div
@@ -222,50 +242,138 @@
     <script th:inline="javascript">
         /*[+
         const chartDates = [[${ datesHistory }]];
-        const chartCalories = [[${ caloriesHistory }]];
-        const chartSteps = [[${ stepsHistory }]];
+        const workoutFreq = [[${ workoutFrequencyHistory }]];
+        const workoutDur = [[${ workoutDurationHistory }]];
+        const calEaten = [[${ caloriesEatenHistory }]];
+        const calBurned = [[${ caloriesBurnedHistory }]];
+        const waterIntake = [[${ waterIntakeHistory }]];
+        const sleepPattern = [[${ sleepHistory }]];
         +]*/
 
-        // Calories Chart
-        new Chart(document.getElementById('caloriesChart'), {
+        // Workout Frequency & Duration Chart
+        new Chart(document.getElementById('workoutChart'), {
             type: 'bar',
             data: {
                 labels: chartDates,
-                datasets: [{
-                    label: 'Calories Intake',
-                    data: chartCalories,
-                    backgroundColor: '#4F46E5',
-                    borderRadius: 5
-                }]
+                datasets: [
+                    {
+                        label: 'Frequency (count)',
+                        data: workoutFreq,
+                        type: 'line',
+                        borderColor: '#10B981',
+                        backgroundColor: '#10B981',
+                        yAxisID: 'y1',
+                        tension: 0.4,
+                        order: 0
+                    },
+                    {
+                        label: 'Duration (min)',
+                        data: workoutDur,
+                        backgroundColor: 'rgba(79, 70, 229, 0.7)',
+                        yAxisID: 'y',
+                        borderRadius: 5,
+                        order: 1
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    y: { beginAtZero: true }
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: 'Minutes' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
+                        title: { display: true, text: 'Count' },
+                        ticks: { stepSize: 1 }
+                    }
                 }
             }
         });
 
-        // Steps Chart
-        new Chart(document.getElementById('stepsChart'), {
+        // Calories Consumed & Burned Chart
+        new Chart(document.getElementById('caloriesCompareChart'), {
             type: 'line',
             data: {
                 labels: chartDates,
-                datasets: [{
-                    label: 'Steps',
-                    data: chartSteps,
-                    borderColor: '#10B981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
+                datasets: [
+                    {
+                        label: 'Consumed',
+                        data: calEaten,
+                        borderColor: '#4F46E5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Burned',
+                        data: calBurned,
+                        borderColor: '#EF4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }
+                ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    y: { beginAtZero: true }
+                    y: { beginAtZero: true, title: { display: true, text: 'Calories (kcal)' } }
+                }
+            }
+        });
+
+        // Water Intake & Sleep Pattern Chart
+        new Chart(document.getElementById('healthPatternChart'), {
+            type: 'bar',
+            data: {
+                labels: chartDates,
+                datasets: [
+                    {
+                        label: 'Sleep (hrs)',
+                        data: sleepPattern,
+                        type: 'line',
+                        borderColor: '#EF4444',
+                        backgroundColor: '#EF4444',
+                        yAxisID: 'y1',
+                        tension: 0.4,
+                        order: 0
+                    },
+                    {
+                        label: 'Water (L)',
+                        data: waterIntake,
+                        backgroundColor: '#3B82F6',
+                        yAxisID: 'y',
+                        borderRadius: 5,
+                        order: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: 'Liters' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        grid: { drawOnChartArea: false },
+                        title: { display: true, text: 'Hours' }
+                    }
                 }
             }
         });
