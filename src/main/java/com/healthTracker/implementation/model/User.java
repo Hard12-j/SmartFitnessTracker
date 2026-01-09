@@ -28,6 +28,8 @@ public class User {
 
     private Integer dailyStepGoal = 10000;
     private Integer weeklyWorkoutGoal = 5;
+    private Double weightGoal;
+    private Double waterIntakeGoal = 3.0;
 
     // Trainer specific fields
     private String specialization;

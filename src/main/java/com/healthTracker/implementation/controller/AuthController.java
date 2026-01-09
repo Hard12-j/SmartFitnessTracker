@@ -119,10 +119,16 @@ public class AuthController {
                 .mapToDouble(com.healthTracker.implementation.model.DailyLog::getSleepDuration)
                 .sum();
 
+        double waterIntake = logs.stream()
+                .filter(l -> l.getDate().equals(today))
+                .mapToDouble(com.healthTracker.implementation.model.DailyLog::getWaterIntake)
+                .sum();
+
         model.addAttribute("caloriesEaten", caloriesEaten);
         model.addAttribute("caloriesBurned", caloriesBurned);
         model.addAttribute("steps", steps);
         model.addAttribute("sleep", sleep);
+        model.addAttribute("waterIntake", waterIntake);
 
         // Calculate Weekly Summary (Last 7 days)
         java.util.List<String> datesHistory = new java.util.ArrayList<>();
@@ -192,6 +198,17 @@ public class AuthController {
         // Goal Tracking
         Integer dailyStepGoal = user.getDailyStepGoal() != null ? user.getDailyStepGoal() : 10000;
         Integer weeklyWorkoutGoal = user.getWeeklyWorkoutGoal() != null ? user.getWeeklyWorkoutGoal() : 5;
+        Double weightGoal = user.getWeightGoal() != null ? user.getWeightGoal() : 70.0;
+        Double waterIntakeGoal = user.getWaterIntakeGoal() != null ? user.getWaterIntakeGoal() : 3.0;
+
+        double currentWeight = 0;
+        try {
+            if (user.getWeight() != null && !user.getWeight().isEmpty()) {
+                currentWeight = Double.parseDouble(user.getWeight());
+            }
+        } catch (Exception e) {
+            currentWeight = 0;
+        }
 
         // Calculate Workouts in Last 7 Days (Unique Days)
         long weeklyWorkoutsCompleted = workouts.stream()
@@ -203,6 +220,10 @@ public class AuthController {
         model.addAttribute("dailyStepGoal", dailyStepGoal);
         model.addAttribute("weeklyWorkoutGoal", weeklyWorkoutGoal);
         model.addAttribute("weeklyWorkoutsCompleted", weeklyWorkoutsCompleted);
+        model.addAttribute("weightGoal", weightGoal);
+        model.addAttribute("currentWeight", currentWeight);
+        model.addAttribute("waterIntakeGoal", waterIntakeGoal);
+        model.addAttribute("user", user);
 
         // Assigned Plans
         model.addAttribute("assignedDiet", planService.getDietPlansForUser(user.getId()));
