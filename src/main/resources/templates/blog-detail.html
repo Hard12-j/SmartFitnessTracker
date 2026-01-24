@@ -330,7 +330,6 @@
     <script th:inline="javascript">
         const currentUser = /*[[${user != null ? user.first + ' ' + user.last : ''}]]*/ '';
         const currentUsername = /*[[${user != null ? user.username : ''}]]*/ '';
-        const isAdmin = /*[[${user != null && user.role != null && (user.role.toUpperCase() == 'ADMIN')}]]*/ false;
 
         const urlParams = new URLSearchParams(window.location.search);
         const blogId = urlParams.get('id');
@@ -361,8 +360,16 @@
                 }
 
 
-                const isAuthor = blog.authorUsername === currentUsername;
-                if (isAuthor) {
+                const trimmedCurrentUser = currentUsername.trim().toLowerCase();
+                const isUsernameMatch = blog.authorUsername && blog.authorUsername.trim().toLowerCase() === trimmedCurrentUser;
+                const isNameMatch = blog.authorName && blog.authorName.trim().toLowerCase() === trimmedCurrentUser;
+
+                const isAuthor = isUsernameMatch || isNameMatch;
+                const canManage = isAuthor;
+
+                console.log(`- Detail Author Match Result:`, { isUsernameMatch, isNameMatch, isAuthor });
+
+                if (canManage) {
                     document.getElementById('author-actions').style.display = 'block';
                     document.getElementById('edit-btn').href = `/blogs/edit?id=${blog.id}`;
                 }

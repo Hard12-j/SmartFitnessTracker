@@ -99,10 +99,16 @@ public class BlogController {
     }
 
     private boolean canManageBlog(BlogDTO blog, java.security.Principal principal) {
-        if (principal == null)
+        if (principal == null || blog == null)
             return false;
-        String currentUsername = principal.getName();
-        return java.util.Objects.equals(blog.getAuthorUsername(), currentUsername);
+        String currentUsername = principal.getName().trim().toLowerCase();
+
+        boolean usernameMatch = blog.getAuthorUsername() != null &&
+                blog.getAuthorUsername().trim().toLowerCase().equals(currentUsername);
+        boolean nameMatch = blog.getAuthorName() != null &&
+                blog.getAuthorName().trim().toLowerCase().equals(currentUsername);
+
+        return usernameMatch || nameMatch;
     }
 
     @GetMapping("/{id}/comments")

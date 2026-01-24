@@ -242,57 +242,68 @@
     <script th:inline="javascript">
         /*[+
         const chartDates = [[${ datesHistory }]];
-        const workoutFreq = [[${ workoutFrequencyHistory }]];
-        const workoutDur = [[${ workoutDurationHistory }]];
+        const workoutDataByType = [[${ workoutDataByType }]];
         const calEaten = [[${ caloriesEatenHistory }]];
         const calBurned = [[${ caloriesBurnedHistory }]];
         const waterIntake = [[${ waterIntakeHistory }]];
         const sleepPattern = [[${ sleepHistory }]];
+
+        // Helper to generate a distinct color for each workout type
+        function getWorkoutColor(index) {
+            const colors = [
+                'rgba(79, 70, 229, 0.8)',  // Indigo
+                'rgba(16, 185, 129, 0.8)', // Emerald
+                'rgba(245, 158, 11, 0.8)', // Amber
+                'rgba(239, 68, 68, 0.8)',  // Red
+                'rgba(6, 182, 212, 0.8)',  // Cyan
+                'rgba(139, 92, 246, 0.8)', // Violet
+                'rgba(236, 72, 153, 0.8)'  // Pink
+            ];
+            return colors[index % colors.length];
+        }
+
+        // Prepare datasets for Workout Chart
+        const workoutDatasets = Object.keys(workoutDataByType).map((type, index) => ({
+            label: type,
+            data: workoutDataByType[type],
+            backgroundColor: getWorkoutColor(index),
+            borderRadius: 5,
+            stack: 'Stack 0'
+        }));
         +]*/
 
-        // Workout Frequency & Duration Chart
+        // Workout Frequency & Duration Chart (Stacked Bar)
         new Chart(document.getElementById('workoutChart'), {
             type: 'bar',
             data: {
                 labels: chartDates,
-                datasets: [
-                    {
-                        label: 'Frequency (count)',
-                        data: workoutFreq,
-                        type: 'line',
-                        borderColor: '#10B981',
-                        backgroundColor: '#10B981',
-                        yAxisID: 'y1',
-                        tension: 0.4,
-                        order: 0
-                    },
-                    {
-                        label: 'Duration (min)',
-                        data: workoutDur,
-                        backgroundColor: 'rgba(79, 70, 229, 0.7)',
-                        yAxisID: 'y',
-                        borderRadius: 5,
-                        order: 1
-                    }
-                ]
+                datasets: workoutDatasets
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                        title: { display: true, text: 'Minutes' }
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return ` ${context.dataset.label}: ${context.raw} min`;
+                            }
+                        }
                     },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        grid: { drawOnChartArea: false },
-                        title: { display: true, text: 'Count' },
-                        ticks: { stepSize: 1 }
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#6B7280', usePointStyle: true, padding: 15 }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: { display: false }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        title: { display: true, text: 'Duration (min)', color: '#6B7280' }
                     }
                 }
             }

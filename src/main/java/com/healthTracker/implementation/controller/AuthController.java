@@ -140,6 +140,8 @@ public class AuthController {
         java.util.List<Double> waterIntakeHistory = new java.util.ArrayList<>();
         java.util.List<Double> sleepHistory = new java.util.ArrayList<>();
 
+        java.util.Map<String, java.util.List<Integer>> workoutDataByType = new java.util.HashMap<>();
+
         for (int i = 6; i >= 0; i--) {
             java.time.LocalDate date = today.minusDays(i);
             datesHistory.add(date.format(java.time.format.DateTimeFormatter.ofPattern("MMM dd")));
@@ -162,16 +164,25 @@ public class AuthController {
                     .sum();
             stepsHistory.add(dailySteps);
 
-            long frequency = workouts.stream()
+            // Fetch and Group Workouts by Type for this date
+            java.util.List<com.healthTracker.implementation.model.Workout> dailyWorkouts = workouts.stream()
                     .filter(w -> w.getDate().equals(date))
-                    .count();
-            workoutFrequencyHistory.add(frequency);
+                    .collect(java.util.stream.Collectors.toList());
 
-            int dailyDuration = workouts.stream()
-                    .filter(w -> w.getDate().equals(date))
-                    .mapToInt(com.healthTracker.implementation.model.Workout::getDuration)
-                    .sum();
-            workoutDurationHistory.add(dailyDuration);
+            // Track unique types across all days to ensure data lists are full
+            java.util.Set<String> allTypes = workouts.stream()
+                    .filter(w -> w.getDate().isAfter(today.minusDays(7)) || w.getDate().equals(today.minusDays(7)))
+                    .map(com.healthTracker.implementation.model.Workout::getType)
+                    .filter(java.util.Objects::nonNull)
+                    .collect(java.util.stream.Collectors.toSet());
+
+            for (String type : allTypes) {
+                int durationForType = dailyWorkouts.stream()
+                        .filter(w -> type.equals(w.getType()))
+                        .mapToInt(com.healthTracker.implementation.model.Workout::getDuration)
+                        .sum();
+                workoutDataByType.computeIfAbsent(type, k -> new java.util.ArrayList<>()).add(durationForType);
+            }
 
             double dailyWater = logs.stream()
                     .filter(l -> l.getDate().equals(date))
@@ -190,8 +201,7 @@ public class AuthController {
         model.addAttribute("caloriesEatenHistory", caloriesEatenHistory);
         model.addAttribute("caloriesBurnedHistory", caloriesBurnedHistory);
         model.addAttribute("stepsHistory", stepsHistory);
-        model.addAttribute("workoutFrequencyHistory", workoutFrequencyHistory);
-        model.addAttribute("workoutDurationHistory", workoutDurationHistory);
+        model.addAttribute("workoutDataByType", workoutDataByType);
         model.addAttribute("waterIntakeHistory", waterIntakeHistory);
         model.addAttribute("sleepHistory", sleepHistory);
 

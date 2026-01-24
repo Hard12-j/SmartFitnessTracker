@@ -310,7 +310,9 @@
 
     <div class="container">
         <div class="header">
-            <h1 class="section-title">Health Blogs</h1>
+            <div>
+                <h1 class="section-title">Health Blogs</h1>
+            </div>
             <a href="/blogs/create" class="btn-primary">+ Create New Post</a>
         </div>
 
@@ -334,7 +336,6 @@
     <script th:inline="javascript">
         const currentUser = /*[[${user != null ? user.first + ' ' + user.last : ''}]]*/ '';
         const currentUsername = /*[[${user != null ? user.username : ''}]]*/ '';
-        const isAdmin = /*[[${user != null && user.role != null && (user.role.toUpperCase() == 'ADMIN')}]]*/ false;
 
         async function loadBlogs() {
             const category = document.getElementById('category-filter').value;
@@ -362,12 +363,20 @@
             }
 
             blogs.forEach(blog => {
+                console.log(`Checking blog ID ${blog.id}:`, blog);
                 const card = document.createElement('div');
                 card.className = 'blog-card';
 
                 const imageUrl = blog.imageUrl || 'https://via.placeholder.com/400x200?text=No+Image';
-                const isAuthor = blog.authorUsername === currentUsername;
+
+                const trimmedCurrentUser = currentUsername.trim().toLowerCase();
+                const isUsernameMatch = blog.authorUsername && blog.authorUsername.trim().toLowerCase() === trimmedCurrentUser;
+                const isNameMatch = blog.authorName && blog.authorName.trim().toLowerCase() === trimmedCurrentUser;
+
+                const isAuthor = isUsernameMatch || isNameMatch;
                 const canManage = isAuthor;
+
+                console.log(`- Author Match Result for ${blog.id}:`, { isUsernameMatch, isNameMatch, isAuthor });
 
                 card.innerHTML = `
                     <img src="${imageUrl}" alt="${blog.title}" class="blog-image">
