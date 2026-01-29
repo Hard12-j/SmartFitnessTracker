@@ -1,0 +1,441 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <title>Post Detail - Health Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            margin: 0;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background-color: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+        }
+
+        .navbar-brand {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .post-container {
+            background-color: var(--card-bg);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 2rem;
+        }
+
+        .post-header {
+            padding: 2.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .post-category {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .post-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0 0 1.5rem 0;
+            letter-spacing: -0.025em;
+        }
+
+        .post-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .post-image {
+            width: 100%;
+            max-height: 450px;
+            object-fit: cover;
+        }
+
+        .post-body {
+            padding: 2.5rem;
+            font-size: 1.125rem;
+            color: var(--text-main);
+            white-space: pre-wrap;
+        }
+
+        .post-footer {
+            padding: 1.5rem 2.5rem;
+            background: rgba(15, 23, 42, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .btn {
+            padding: 0.6rem 1.25rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-like {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .btn-like.liked {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .btn-edit {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        /* Comments Section */
+        .comments-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .comment-input-area {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin-bottom: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .comment-textarea {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            color: var(--text-main);
+            font-family: inherit;
+            resize: none;
+            margin-bottom: 1rem;
+            box-sizing: border-box;
+        }
+
+        .comment-item {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .comment-bubble {
+            background: var(--card-bg);
+            padding: 1.25rem;
+            border-radius: 0 1.25rem 1.25rem 1.25rem;
+            flex: 1;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .comment-author {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+
+        .comment-text {
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        .comment-time {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            display: block;
+        }
+
+        .action-link {
+            color: var(--danger);
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .btn-logout {
+            background-color: var(--danger);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar"
+        style="background-color: #d4e7f7; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center;">
+        <a href="/welcome" class="navbar-brand"
+            style="font-size: 1.5rem; font-weight: bold; color: #4F46E5; text-decoration: none;">HealthTracker</a>
+        <div style="display: flex; gap: 1.5rem; align-items: center;">
+            <a th:href="${#authorization.expression('hasRole(''ADMIN'')') ? '/admin/dashboard' : (#authorization.expression('hasRole(''TRAINER'')') ? '/trainer/dashboard' : '/welcome')}"
+                style="color: #6B7280; text-decoration: none; font-weight: 600; font-size: 0.8rem; transition: color 0.2s;">DASHBOARD</a>
+            <a href="/articles"
+                style="color: #6B7280; text-decoration: none; font-weight: 600; font-size: 0.8rem; transition: color 0.2s;">BACK</a>
+            <a href="/logout" class="btn-logout">LOGOUT</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="post-container">
+            <header class="post-header">
+                <span id="blog-category" class="post-category"></span>
+                <h1 id="blog-title" class="post-title"></h1>
+                <div class="post-meta">
+                    <div id="author-initials" class="author-avatar"></div>
+                    <div>
+                        <span id="blog-author-name" style="display: block; font-weight: 600;"></span>
+                        <span id="blog-date" class="post-date"></span>
+                    </div>
+                </div>
+            </header>
+
+            <img id="blog-image" src="" alt="" class="post-image" style="display: none;">
+
+            <div id="blog-content" class="post-body"></div>
+
+            <footer class="post-footer">
+                <button id="like-btn" class="btn btn-like" onclick="toggleLike()">
+                    ❤️ <span id="likes-count">0</span>
+                </button>
+
+                <div id="author-actions" style="display: none; gap: 0.75rem;">
+                    <a id="edit-btn" href="#" class="btn btn-edit">Edit</a>
+                    <button class="btn btn-delete" onclick="deleteBlog()">Delete</button>
+                </div>
+            </footer>
+        </article>
+
+        <section class="comments-section">
+            <div class="comments-header">
+                <h2 style="font-weight: 800; letter-spacing: -0.025em; margin: 0;">Comments (<span
+                        id="comments-count">0</span>)</h2>
+            </div>
+
+            <div class="comment-input-area">
+                <textarea id="comment-textarea" class="comment-textarea" rows="3"
+                    placeholder="Write a comment..."></textarea>
+                <button class="btn" style="background-color: var(--primary-color); color: white; margin-left: auto;"
+                    onclick="submitComment()">Post Comment</button>
+            </div>
+
+            <div id="comment-list">
+                <!-- Comments populated by JS -->
+            </div>
+        </section>
+    </div>
+
+    <script th:inline="javascript">
+        const currentUser = /*[[${user != null ? user.first + ' ' + user.last : ''}]]*/ '';
+        const currentUsername = /*[[${user != null ? user.username : ''}]]*/ '';
+        const currentUserRole = /*[[${user != null ? user.role : ''}]]*/ '';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const blogId = urlParams.get('id');
+
+        if (!blogId) window.location.href = '/articles';
+
+        async function loadBlogDetail() {
+            try {
+                const response = await fetch(`/api/blogs/${blogId}`);
+                const blog = await response.json();
+
+                document.getElementById('blog-title').textContent = blog.title;
+                document.getElementById('blog-category').textContent = blog.category;
+                document.getElementById('blog-author-name').textContent = blog.authorName;
+                document.getElementById('blog-date').textContent = new Date(blog.publishedDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+                document.getElementById('blog-content').textContent = blog.content;
+                document.getElementById('likes-count').textContent = blog.likesCount;
+                document.getElementById('comments-count').textContent = blog.commentsCount;
+
+                const initials = blog.authorName.split(' ').map(n => n[0]).join('').toUpperCase();
+                document.getElementById('author-initials').textContent = initials;
+
+                if (blog.imageUrl && blog.contentType !== 'POST') {
+                    const img = document.getElementById('blog-image');
+                    img.src = blog.imageUrl;
+                    img.style.display = 'block';
+                } else {
+                    document.getElementById('blog-image').style.display = 'none';
+                }
+
+                const normalizedSessionUser = currentUsername ? currentUsername.trim().toLowerCase() : '';
+                const isAuthor = (blog.authorUsername && blog.authorUsername.trim().toLowerCase() === normalizedSessionUser) ||
+                    (blog.authorName && blog.authorName.trim().toLowerCase() === normalizedSessionUser);
+
+                const canManage = (currentUserRole === 'ADMIN') || isAuthor;
+
+                if (canManage) {
+                    document.getElementById('author-actions').style.display = 'flex';
+                    document.getElementById('edit-btn').href = `/articles/edit?id=${blog.id}`;
+                }
+
+                loadComments();
+                checkLikeStatus();
+            } catch (error) {
+                console.error(error);
+                window.location.href = '/articles';
+            }
+        }
+
+        async function loadComments() {
+            const response = await fetch(`/api/blogs/${blogId}/comments`);
+            const comments = await response.json();
+            const list = document.getElementById('comment-list');
+            list.innerHTML = '';
+
+            comments.forEach(comment => {
+                const initials = comment.userName.split(' ').map(n => n[0]).join('').toUpperCase();
+                const div = document.createElement('div');
+                div.className = 'comment-item';
+                div.innerHTML = `
+                    <div class="author-avatar" style="width: 32px; height: 32px; font-size: 0.8rem;">${initials}</div>
+                    <div class="comment-bubble">
+                        <span class="comment-author">${comment.userName}</span>
+                        <div class="comment-text">${comment.commentText}</div>
+                        <span class="comment-time">${new Date(comment.createdAt).toLocaleString()}</span>
+                        ${comment.userName === currentUser ? `<button class="action-link" onclick="deleteComment(${comment.id})">Delete</button>` : ''}
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        async function submitComment() {
+            const text = document.getElementById('comment-textarea').value.trim();
+            if (!text) return;
+            const response = await fetch(`/api/blogs/${blogId}/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userName: currentUser, commentText: text })
+            });
+            if (response.ok) {
+                document.getElementById('comment-textarea').value = '';
+                loadComments();
+                const countEl = document.getElementById('comments-count');
+                countEl.textContent = parseInt(countEl.textContent) + 1;
+            }
+        }
+
+        async function toggleLike() {
+            const response = await fetch(`/api/blogs/${blogId}/like`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userName: currentUser })
+            });
+            const data = await response.json();
+            document.getElementById('likes-count').textContent = data.likesCount;
+            document.getElementById('like-btn').classList.toggle('liked', data.liked);
+        }
+
+        async function checkLikeStatus() {
+            const response = await fetch(`/api/blogs/${blogId}/like-status?userName=${encodeURIComponent(currentUser)}`);
+            const data = await response.json();
+            document.getElementById('like-btn').classList.toggle('liked', data.liked);
+        }
+
+        async function deleteBlog() {
+            if (!confirm('Delete this post?')) return;
+            const response = await fetch(`/api/blogs/${blogId}`, { method: 'DELETE' });
+            if (response.ok) window.location.href = '/articles';
+        }
+
+        async function deleteComment(id) {
+            if (!confirm('Delete comment?')) return;
+            const response = await fetch(`/api/blogs/comments/${id}`, { method: 'DELETE' });
+            if (response.ok) {
+                loadComments();
+                const countEl = document.getElementById('comments-count');
+                countEl.textContent = Math.max(0, parseInt(countEl.textContent) - 1);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadBlogDetail);
+    </script>
+</body>
+
+</html>

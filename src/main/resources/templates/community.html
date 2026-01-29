@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <title>Community Feed - Health Tracker</title>
+    <style>
+        :root {
+            --primary-color: #4F46E5;
+            --primary-hover: #4338CA;
+            --bg-color: #242d3f;
+            --card-bg: #d4e7f7;
+            --text-main: #d4e7f7;
+            --text-secondary: #6B7280;
+            --danger-color: #EF4444;
+            --accent: #38bdf8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            color: var(--text-main);
+        }
+
+        .navbar {
+            background-color: var(--card-bg);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .feed-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .post-card {
+            background-color: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            color: #242d3f;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .author-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .author-name {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .badge-type {
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+        }
+
+        .badge-article {
+            background-color: rgba(79, 70, 229, 0.1);
+            color: var(--primary-color);
+        }
+
+        .badge-post {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .post-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            display: block;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .post-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            color: #4b5563;
+        }
+
+        .post-footer {
+            display: flex;
+            gap: 1.5rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            padding-top: 1rem;
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .interaction {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            cursor: pointer;
+        }
+
+        .interaction:hover {
+            color: var(--primary-color);
+        }
+
+        .btn-create {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 2rem;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .btn-create:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <a href="/welcome" class="navbar-brand">HealthTracker</a>
+        <div class="nav-links">
+            <a href="/articles" class="nav-link">BLOG</a>
+            <a href="/community" class="nav-link" style="color: var(--primary-color);">Community</a>
+            <a href="/profile" class="nav-link">My Profile</a>
+            <a href="/logout" class="nav-link">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1 class="section-title">Community Feed</h1>
+            <p style="color: var(--text-secondary);">Connect and share with the HealthTracker community.</p>
+        </div>
+
+        <div id="feed" class="feed-container">
+            <!-- Feed items will be loaded here -->
+        </div>
+    </div>
+
+    <a href="/articles/create" class="btn-create">+ Share Something</a>
+
+    <script th:inline="javascript">
+        async function loadFeed() {
+            try {
+                const response = await fetch('/api/blogs');
+                const posts = await response.json();
+                renderFeed(posts);
+            } catch (error) {
+                console.error('Error loading feed:', error);
+            }
+        }
+
+        function renderFeed(posts) {
+            const feed = document.getElementById('feed');
+            feed.innerHTML = '';
+
+            if (posts.length === 0) {
+                feed.innerHTML = '<p style="text-align: center; color: #94a3b8;">No posts yet. Be the first to share!</p>';
+                return;
+            }
+
+            posts.forEach(post => {
+                const card = document.createElement('div');
+                card.className = 'post-card';
+                card.innerHTML = `
+                    <div class="post-header">
+                        <div class="author-info">
+                            <span class="author-name">${post.authorName}</span>
+                            <span class="badge-type ${post.contentType === 'ARTICLE' ? 'badge-article' : 'badge-post'}">
+                                ${post.contentType}
+                            </span>
+                        </div>
+                        <span style="font-size: 0.8rem; color: #94a3b8;">${new Date(post.publishedDate).toLocaleDateString()}</span>
+                    </div>
+                    <a href="/articles/detail?id=${post.id}" class="post-title">${post.title}</a>
+                    <div class="post-content">${post.content.substring(0, 200)}${post.content.length > 200 ? '...' : ''}</div>
+                    <div class="post-footer">
+                        <span class="interaction">❤️ ${post.likesCount}</span>
+                        <span class="interaction">💬 ${post.commentsCount}</span>
+                    </div>
+                `;
+                feed.appendChild(card);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadFeed);
+    </script>
+</body>
+
+</html>

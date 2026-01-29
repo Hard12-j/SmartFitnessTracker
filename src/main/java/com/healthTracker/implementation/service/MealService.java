@@ -6,7 +6,9 @@ import com.healthTracker.implementation.repository.MealRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MealService {
@@ -19,6 +21,11 @@ public class MealService {
     }
 
     public List<Meal> findMealsByUser(User user) {
-        return mealRepository.findByUser(user);
+        LocalDate startOfMonth = LocalDate.now().withDayOfMonth(1);
+        LocalDate endOfMonth = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
+
+        return mealRepository.findByUser(user).stream()
+                .filter(m -> !m.getDate().isBefore(startOfMonth) && !m.getDate().isAfter(endOfMonth))
+                .collect(Collectors.toList());
     }
 }

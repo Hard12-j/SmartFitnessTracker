@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>User Stats - Admin Panel</title>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent: #38bdf8;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background-color: var(--card-bg);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .btn-back {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .btn-back:hover {
+            color: var(--text-main);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            background-color: rgba(255, 255, 255, 0.02);
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            text-align: center;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        th {
+            text-align: left;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        td {
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <a href="/admin/dashboard" class="navbar-brand">AdminPanel</a>
+    </nav>
+
+    <div class="container">
+        <a href="/admin/dashboard" class="btn-back">← Back to Dashboard</a>
+
+        <div class="card">
+            <h1 th:text="${targetUser.first} + ' ' + ${targetUser.last}">User Name</h1>
+            <p th:text="${targetUser.username}" style="color: var(--text-secondary); margin-top: -1rem;">
+                username@mail.com</p>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Role</div>
+                    <div class="stat-value" th:text="${targetUser.role}">USER</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Workouts</div>
+                    <div class="stat-value" th:text="${#lists.size(workouts)}">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Meals</div>
+                    <div class="stat-value" th:text="${#lists.size(meals)}">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Weight (Current)</div>
+                    <div class="stat-value" th:text="${targetUser.weight} ?: 'N/A'">70</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">Recent Workouts</h2>
+            <table th:if="${!#lists.isEmpty(workouts)}">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Duration</th>
+                        <th>Calories</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="w : ${workouts}">
+                        <td th:text="${w.date}">2023-01-01</td>
+                        <td th:text="${w.type}">Running</td>
+                        <td th:text="${w.duration} + ' min'">30 min</td>
+                        <td th:text="${w.calories} + ' kcal'">300 kcal</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p th:if="${#lists.isEmpty(workouts)}" style="color: var(--text-secondary);">No workouts recorded yet.</p>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title">Diet Logs</h2>
+            <table th:if="${!#lists.isEmpty(meals)}">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Meal</th>
+                        <th>Calories</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="m : ${meals}">
+                        <td th:text="${m.date}">2023-01-01</td>
+                        <td th:text="${m.mealName}">Breakfast</td>
+                        <td th:text="${m.calories} + ' kcal'">400 kcal</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p th:if="${#lists.isEmpty(meals)}" style="color: var(--text-secondary);">No meals recorded yet.</p>
+        </div>
+    </div>
+</body>
+
+</html>

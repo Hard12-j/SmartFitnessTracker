@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -25,9 +27,27 @@ public class BlogController {
 
     @GetMapping
     public ResponseEntity<List<BlogDTO>> getAllBlogs(
-            @RequestParam(required = false) String category) {
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String contentType,
+            @RequestParam(required = false) String authorType) {
         List<BlogDTO> blogs;
-        if (category != null && !category.isEmpty()) {
+        if (authorType != null && !authorType.isEmpty()) {
+            blogs = blogService.getBlogsByAuthorType(authorType);
+            if (category != null && !category.isEmpty()) {
+                blogs = blogs.stream().filter(b -> category.equalsIgnoreCase(b.getCategory()))
+                        .collect(java.util.stream.Collectors.toList());
+            }
+            if (contentType != null && !contentType.isEmpty()) {
+                blogs = blogs.stream().filter(b -> contentType.equalsIgnoreCase(b.getContentType()))
+                        .collect(java.util.stream.Collectors.toList());
+            }
+        } else if (contentType != null && !contentType.isEmpty()) {
+            blogs = blogService.getBlogsByContentType(contentType);
+            if (category != null && !category.isEmpty()) {
+                blogs = blogs.stream().filter(b -> category.equalsIgnoreCase(b.getCategory()))
+                        .collect(java.util.stream.Collectors.toList());
+            }
+        } else if (category != null && !category.isEmpty()) {
             blogs = blogService.getBlogsByCategory(category);
         } else {
             blogs = blogService.getAllBlogs();
@@ -45,13 +65,23 @@ public class BlogController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<BlogDTO> createBlog(@RequestBody BlogDTO blogDTO, java.security.Principal principal) {
+    @PostMapping(consumes = { "multipart/form-data" })
+    public ResponseEntity<BlogDTO> createBlog(
+            @RequestPart("blog") BlogDTO blogDTO,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            java.security.Principal principal) {
         if (principal == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         String currentUsername = principal.getName();
         com.healthTracker.implementation.model.User user = userService.getUserByUsername(currentUsername);
+
+        // Security Check: Unverified users cannot create Articles
+        if ("USER".equalsIgnoreCase(user.getRole()) &&
+                "ARTICLE".equalsIgnoreCase(blogDTO.getContentType()) &&
+                !user.isVerifiedUser()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         blogDTO.setAuthorUsername(currentUsername);
         blogDTO.setAuthorName(user.getFirst() + " " + user.getLast());
@@ -59,12 +89,24 @@ public class BlogController {
             blogDTO.setAuthorType(user.getRole() != null ? user.getRole() : "USER");
         }
 
+        try {
+            if (image != null && !image.isEmpty()) {
+                String imageUrl = blogService.saveBlogImage(image);
+                blogDTO.setImageUrl(imageUrl);
+            }
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
         BlogDTO createdBlog = blogService.createBlog(blogDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdBlog);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<BlogDTO> updateBlog(@PathVariable Long id, @RequestBody BlogDTO blogDTO,
+    @PutMapping(value = "/{id}", consumes = { "multipart/form-data" })
+    public ResponseEntity<BlogDTO> updateBlog(
+            @PathVariable Long id,
+            @RequestPart("blog") BlogDTO blogDTO,
+            @RequestPart(value = "image", required = false) MultipartFile image,
             java.security.Principal principal) {
         if (principal == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -73,10 +115,22 @@ public class BlogController {
             if (!canManageBlog(existingBlog, principal)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
+
+            if (image != null && !image.isEmpty()) {
+                String imageUrl = blogService.saveBlogImage(image);
+                blogDTO.setImageUrl(imageUrl);
+            } else {
+                // Preserve existing image if no new one is uploaded and no explicit URL is
+                // provided
+                if (blogDTO.getImageUrl() == null || blogDTO.getImageUrl().isEmpty()) {
+                    blogDTO.setImageUrl(existingBlog.getImageUrl());
+                }
+            }
+
             BlogDTO updatedBlog = blogService.updateBlog(id, blogDTO);
             return ResponseEntity.ok(updatedBlog);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
+        } catch (RuntimeException | IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

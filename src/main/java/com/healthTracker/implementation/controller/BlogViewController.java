@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.security.Principal;
 
 @Controller
-@RequestMapping("/blogs")
+@RequestMapping("/articles")
 public class BlogViewController {
 
     @Autowired
@@ -23,7 +23,25 @@ public class BlogViewController {
             User user = userService.getUserByUsername(principal.getName());
             model.addAttribute("user", user);
         }
-        return "blogs";
+        return "articles";
+    }
+
+    @GetMapping("/articles")
+    public String showArticles(Model model, Principal principal) {
+        if (principal != null) {
+            User user = userService.getUserByUsername(principal.getName());
+            model.addAttribute("user", user);
+        }
+        return "articles";
+    }
+
+    @GetMapping("/community")
+    public String showCommunity(Model model, Principal principal) {
+        if (principal != null) {
+            User user = userService.getUserByUsername(principal.getName());
+            model.addAttribute("user", user);
+        }
+        return "community";
     }
 
     @GetMapping("/create")
@@ -32,7 +50,7 @@ public class BlogViewController {
             User user = userService.getUserByUsername(principal.getName());
             model.addAttribute("user", user);
         }
-        return "blog-create";
+        return "article-create";
     }
 
     @GetMapping("/edit")
@@ -41,7 +59,7 @@ public class BlogViewController {
             User user = userService.getUserByUsername(principal.getName());
             model.addAttribute("user", user);
         }
-        return "blog-edit";
+        return "article-edit";
     }
 
     @GetMapping("/detail")
@@ -50,6 +68,6 @@ public class BlogViewController {
             User user = userService.getUserByUsername(principal.getName());
             model.addAttribute("user", user);
         }
-        return "blog-detail";
+        return "article-detail";
     }
 }

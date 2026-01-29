@@ -6,7 +6,9 @@ import com.healthTracker.implementation.repository.WorkoutRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class WorkoutService {
@@ -19,6 +21,11 @@ public class WorkoutService {
     }
 
     public List<Workout> findWorkoutsByUser(User user) {
-        return workoutRepository.findByUser(user);
+        LocalDate startOfMonth = LocalDate.now().withDayOfMonth(1);
+        LocalDate endOfMonth = LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth());
+
+        return workoutRepository.findByUser(user).stream()
+                .filter(w -> !w.getDate().isBefore(startOfMonth) && !w.getDate().isAfter(endOfMonth))
+                .collect(Collectors.toList());
     }
 }

@@ -38,6 +38,7 @@ public class User {
     private String experience;
     private String contactNo;
     private boolean isVerifiedTrainer = false;
+    private boolean isVerifiedUser = false;
     private String profileImageUrl;
     private Long assignedTrainerId;
 }

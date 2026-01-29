@@ -15,13 +15,14 @@ public class BlogDTO {
     private String status;
     private long likesCount;
     private long commentsCount;
+    private String contentType;
 
     public BlogDTO() {
     }
 
     public BlogDTO(Long id, String title, String category, String content, String authorName, String authorUsername,
             String authorType, LocalDateTime publishedDate, String imageUrl, String status, long likesCount,
-            long commentsCount) {
+            long commentsCount, String contentType) {
         this.id = id;
         this.title = title;
         this.category = category;
@@ -34,6 +35,7 @@ public class BlogDTO {
         this.status = status;
         this.likesCount = likesCount;
         this.commentsCount = commentsCount;
+        this.contentType = contentType;
     }
 
     public Long getId() {
@@ -130,6 +132,14 @@ public class BlogDTO {
 
     public void setCommentsCount(long commentsCount) {
         this.commentsCount = commentsCount;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     @Override

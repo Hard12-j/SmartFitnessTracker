@@ -13,6 +13,10 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
 
     List<Blog> findByCategoryOrderByPublishedDateDesc(String category);
 
+    List<Blog> findByContentTypeOrderByPublishedDateDesc(String contentType);
+
+    List<Blog> findByAuthorTypeOrderByPublishedDateDesc(String authorType);
+
     List<Blog> findByAuthorNameOrderByPublishedDateDesc(String authorName);
 
     @Query("SELECT b FROM Blog b ORDER BY b.publishedDate DESC")

@@ -39,6 +39,9 @@ public class Blog {
     @Column(nullable = false)
     private String status = "PUBLISHED"; // PUBLISHED, PENDING, REJECTED
 
+    @Column(nullable = false)
+    private String contentType = "ARTICLE"; // ARTICLE, POST
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -151,6 +154,14 @@ public class Blog {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     public LocalDateTime getCreatedAt() {

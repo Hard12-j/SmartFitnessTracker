@@ -1,0 +1,666 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <title>Blog - Health Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            margin: 0;
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* Navbar Styles - Matched with Dashboard */
+        .navbar {
+            background-color: #d4e7f7;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4F46E5;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #6B7280;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #4F46E5;
+        }
+
+        /* Hero Section */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .page-header {
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 0 0 2rem 0;
+            letter-spacing: -0.025em;
+        }
+
+        /* Tabs */
+        .tabs-nav {
+            display: flex;
+            gap: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.75rem 0;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+        }
+
+        .tab-btn.active {
+            color: var(--success);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--success);
+        }
+
+        /* Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Post Card Redesign */
+        .post-card {
+            background: linear-gradient(145deg, #1e293b, #1a2333);
+            border-radius: 1.25rem;
+            padding: 0;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .post-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .post-image-wrapper {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .post-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .post-card:hover .post-image-wrapper img {
+            transform: scale(1.05);
+        }
+
+        .post-card-content {
+            padding: 1.75rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .author-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .initials-avatar {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .author-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .author-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .badge-type {
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-user {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .badge-trainer {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--primary-color);
+        }
+
+        .badge-admin {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .post-category {
+            font-size: 0.65rem;
+            color: var(--primary-color);
+            background: rgba(99, 102, 241, 0.1);
+            padding: 0.3rem 0.75rem;
+            border-radius: 2rem;
+            font-weight: 800;
+            letter-spacing: 0.075em;
+            text-transform: uppercase;
+        }
+
+        .post-date {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .post-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin: 0 0 1rem 0;
+            color: var(--text-main);
+            text-decoration: none;
+            line-height: 1.3;
+            transition: color 0.2s;
+        }
+
+        .post-title:hover {
+            color: var(--primary-color);
+        }
+
+        .post-excerpt {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex-grow: 1;
+        }
+
+        .post-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .interaction-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            padding: 0.6rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            transform: translateY(-1px);
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-edit {
+            color: var(--primary-color);
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .btn-edit:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .create-btn {
+            background: var(--success);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: opacity 0.2s;
+        }
+
+        .quick-comment-area {
+            display: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .comment-input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.85rem;
+            resize: none;
+            margin-bottom: 0.5rem;
+            box-sizing: border-box;
+        }
+
+        .btn-logout {
+            background-color: var(--danger);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <a href="/welcome" class="navbar-brand">HealthTracker</a>
+        <div class="nav-links">
+            <a th:href="${#authorization.expression('hasRole(''ADMIN'')') ? '/admin/dashboard' : (#authorization.expression('hasRole(''TRAINER'')') ? '/trainer/dashboard' : '/welcome')}"
+                class="nav-link">DASHBOARD</a>
+            <a href="/articles" class="nav-link active">BLOG</a>
+            <a href="/logout" class="btn-logout">LOGOUT</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h1 class="page-title" style="margin: 0;">Blogs</h1>
+                <a href="/articles/create" class="create-btn"
+                    style="position: static; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">+ Create New</a>
+            </div>
+
+            <div class="tabs-nav">
+                <button class="tab-btn" onclick="applyFilter({contentType: 'POST'}, this)">Posts</button>
+                <button class="tab-btn" onclick="applyFilter({contentType: 'ARTICLE'}, this)">Articles</button>
+                <button class="tab-btn active" onclick="applyFilter({}, this)">Community</button>
+            </div>
+        </div>
+
+        <div id="content-grid" class="content-grid">
+
+            <div id="content-grid" class="content-grid">
+                <!-- Dynamically populated -->
+            </div>
+
+            <div style="position: fixed; bottom: 2rem; right: 2rem;">
+                <a href="/articles/create" class="create-btn">+ Create</a>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            const currentUserRole = /*[[${user != null ? user.role : ''}]]*/ '';
+            const currentUsername = /*[[${user != null ? user.username : ''}]]*/ '';
+            const currentUserFullName = /*[[${user != null ? user.first + ' ' + user.last : ''}]]*/ '';
+
+            async function loadContent(params = {}) {
+                let url = '/api/blogs';
+                const searchParams = new URLSearchParams();
+                for (const [key, value] of Object.entries(params)) {
+                    if (value && value !== 'ALL') searchParams.append(key, value);
+                }
+
+                const queryString = searchParams.toString();
+                if (queryString) url += `?${queryString}`;
+
+                try {
+                    const response = await fetch(url);
+                    const posts = await response.json();
+                    renderPosts(posts, params);
+                } catch (error) {
+                    console.error('Error loading content:', error);
+                }
+            }
+
+            function renderPosts(posts, activeParams) {
+                const grid = document.getElementById('content-grid');
+                grid.innerHTML = '';
+
+                const isCommunity = !activeParams.authorType && (!activeParams.contentType || activeParams.contentType === 'ALL');
+
+                if (posts.length === 0) {
+                    grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 4rem;">No content found here.</p>';
+                    return;
+                }
+
+                if (isCommunity) {
+                    const userPosts = posts.filter(p => (p.contentType || (p.authorType === 'USER' ? 'POST' : 'ARTICLE')) === 'POST');
+                    const articles = posts.filter(p => (p.contentType || (p.authorType === 'USER' ? 'POST' : 'ARTICLE')) === 'ARTICLE');
+
+                    const postsSection = document.createElement('div');
+                    postsSection.style.gridColumn = '1 / -1';
+                    postsSection.innerHTML = `
+                        <h2 style="color: var(--success); font-size: 1.1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; letter-spacing: 0.05em;">
+                            <span style="width: 4px; height: 1.2rem; background: var(--success); border-radius: 2px;"></span>
+                            POSTS
+                        </h2>
+                        <div class="content-grid" id="posts-subgrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 1.5rem; margin-bottom: 4rem;">
+                            ${userPosts.length === 0 ? '<p style="color: var(--text-secondary); font-style: italic;">No posts yet.</p>' : ''}
+                        </div>
+                    `;
+                    grid.appendChild(postsSection);
+                    if (userPosts.length > 0) {
+                        const subgrid = document.getElementById('posts-subgrid');
+                        userPosts.forEach(post => subgrid.appendChild(createPostCard(post)));
+                    }
+
+                    const articlesSection = document.createElement('div');
+                    articlesSection.style.gridColumn = '1 / -1';
+                    articlesSection.innerHTML = `
+                        <h2 style="color: var(--primary-color); font-size: 1.1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; letter-spacing: 0.05em;">
+                            <span style="width: 4px; height: 1.2rem; background: var(--primary-color); border-radius: 2px;"></span>
+                            ARTICLES
+                        </h2>
+                        <div class="content-grid" id="articles-subgrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 1.5rem;">
+                            ${articles.length === 0 ? '<p style="color: var(--text-secondary); font-style: italic;">No articles yet.</p>' : ''}
+                        </div>
+                    `;
+                    grid.appendChild(articlesSection);
+                    if (articles.length > 0) {
+                        const subgrid = document.getElementById('articles-subgrid');
+                        articles.forEach(post => subgrid.appendChild(createPostCard(post)));
+                    }
+                } else {
+                    posts.forEach(post => grid.appendChild(createPostCard(post)));
+                }
+            }
+
+            function applyFilter(params, btn) {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                loadContent(params);
+            }
+
+            function filterByRole(role, btn) {
+                applyFilter({ authorType: role }, btn);
+            }
+
+            function createPostCard(post) {
+                const initials = post.authorName ? post.authorName.split(' ').map(n => n[0]).join('').toUpperCase() : '??';
+                const roleClass = `badge-${post.authorType.toLowerCase()}`;
+
+                let imageHtml = '';
+                if (post.imageUrl && post.contentType === 'ARTICLE') {
+                    imageHtml = `
+                    <div class="post-image-wrapper">
+                        <img src="${post.imageUrl}" alt="${post.title}" onerror="this.style.display='none'">
+                    </div>
+                    `;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'post-card';
+                card.innerHTML = `
+                ${imageHtml}
+                <div class="post-card-content">
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+                        <span class="post-category">${post.category}</span>
+                    </div>
+
+                    <div class="post-header">
+                        <div class="author-meta">
+                            <div class="initials-avatar">${initials}</div>
+                            <div class="author-info">
+                                <div class="author-name">
+                                    ${post.authorName}
+                                    <span class="badge-type ${roleClass}">${post.authorType}</span>
+                                </div>
+                                <span class="post-date">${new Date(post.publishedDate).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <a href="/articles/detail?id=${post.id}" class="post-title">${post.title}</a>
+                    <p class="post-excerpt">${post.content}</p>
+                    
+                    <div class="post-footer">
+                        <div class="interaction-group">
+                            <button class="icon-btn" onclick="toggleLikeListing(${post.id}, this)" title="Like">
+                                ❤️ <span class="likes-count">${post.likesCount}</span>
+                            </button>
+                            <button class="icon-btn" onclick="toggleCommentArea(${post.id})" title="Comment">
+                                💬 <span id="count-${post.id}">${post.commentsCount}</span>
+                            </button>
+                            <button class="icon-btn" onclick="window.location.href='/articles/detail?id=${post.id}'" title="View Full">
+                                <img src="https://api.iconify.design/solar:arrow-right-up-bold-duotone.svg?color=%2394a3b8" width="18">
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="comment-area-${post.id}" class="quick-comment-area">
+                        <textarea class="comment-input" id="input-${post.id}" placeholder="Write a quick comment..."></textarea>
+                        <button class="btn-send-comment" onclick="submitQuickComment(${post.id})">Post</button>
+                        <div style="clear:both;"></div>
+                    </div>
+                </div>
+            `;
+                return card;
+            }
+
+            function toggleCommentArea(id) {
+                const area = document.getElementById(`comment-area-${id}`);
+                area.style.display = area.style.display === 'block' ? 'none' : 'block';
+                if (area.style.display === 'block') {
+                    document.getElementById(`input-${id}`).focus();
+                }
+            }
+
+            async function toggleLikeListing(blogId, btn) {
+                if (!currentUserFullName) {
+                    alert('Please login to like this post');
+                    return;
+                }
+                try {
+                    const response = await fetch(`/api/blogs/${blogId}/like`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userName: currentUserFullName })
+                    });
+
+                    const data = await response.json();
+                    btn.querySelector('.likes-count').textContent = data.likesCount;
+                } catch (error) {
+                    console.error('Error toggling like:', error);
+                }
+            }
+
+            async function submitQuickComment(blogId) {
+                if (!currentUserFullName) {
+                    alert('Please login to comment');
+                    return;
+                }
+                const input = document.getElementById(`input-${blogId}`);
+                const text = input.value.trim();
+                if (!text) return;
+
+                try {
+                    const response = await fetch(`/api/blogs/${blogId}/comments`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            userName: currentUserFullName,
+                            commentText: text
+                        })
+                    });
+
+                    if (response.ok) {
+                        input.value = '';
+                        toggleCommentArea(blogId);
+                        const countEl = document.getElementById(`count-${blogId}`);
+                        countEl.textContent = parseInt(countEl.textContent) + 1;
+                        alert('Comment posted successfully!');
+                    }
+                } catch (error) {
+                    console.error('Error posting quick comment:', error);
+                }
+            }
+
+            async function deletePost(id) {
+                if (!confirm('Are you sure you want to delete this content?')) return;
+                try {
+                    const response = await fetch(`/api/blogs/${id}`, { method: 'DELETE' });
+                    if (response.ok) {
+                        loadContent();
+                    }
+                } catch (error) {
+                    console.error('Delete error:', error);
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', () => loadContent());
+        </script>
+</body>
+
+</html>

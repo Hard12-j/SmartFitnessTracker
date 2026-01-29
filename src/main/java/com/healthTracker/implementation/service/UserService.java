@@ -115,4 +115,20 @@ public class UserService {
     public User getUserById(Long id) {
         return userRepository.findById(id).orElse(null);
     }
+
+    public void updateUser(User user) {
+        userRepository.save(user);
+    }
+
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    public void verifyTrainer(Long id) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user != null && "TRAINER".equalsIgnoreCase(user.getRole())) {
+            user.setVerifiedTrainer(true);
+            userRepository.save(user);
+        }
+    }
 }

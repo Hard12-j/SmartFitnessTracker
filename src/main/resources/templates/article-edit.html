@@ -1,0 +1,279 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <title>Edit Content - Health Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            margin: 0;
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .navbar-brand {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 4rem auto;
+            padding: 2.5rem;
+            background-color: var(--card-bg);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            text-align: center;
+            letter-spacing: -0.025em;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background-color: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background-color: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            margin-top: 2rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-top: 1rem;
+        }
+
+        .btn-secondary:hover {
+            color: var(--text-main);
+        }
+
+        .btn-logout {
+            background-color: var(--danger);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar"
+        style="background-color: #d4e7f7; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center;">
+        <a href="/welcome" class="navbar-brand"
+            style="font-size: 1.5rem; font-weight: bold; color: #4F46E5; text-decoration: none;">HealthTracker</a>
+        <div style="display: flex; gap: 1.5rem; align-items: center;">
+            <a th:href="${#authorization.expression('hasRole(''ADMIN'')') ? '/admin/dashboard' : (#authorization.expression('hasRole(''TRAINER'')') ? '/trainer/dashboard' : '/welcome')}"
+                style="color: #6B7280; text-decoration: none; font-weight: 600; font-size: 0.8rem; transition: color 0.2s;">DASHBOARD</a>
+            <a href="/articles"
+                style="color: #6B7280; text-decoration: none; font-weight: 600; font-size: 0.8rem; transition: color 0.2s;">CANCEL</a>
+            <a href="/logout" class="btn-logout">LOGOUT</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="form-title">Edit Blog</h1>
+
+        <form id="edit-form">
+            <div class="form-group">
+                <label class="form-label">CONTENT TYPE</label>
+                <select id="blog-type" class="form-control" required>
+                    <option value="ARTICLE">Article</option>
+                    <option value="POST">Social Post</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">TITLE</label>
+                <input type="text" id="blog-title" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">CATEGORY</label>
+                <select id="blog-category" class="form-control" required>
+                    <option value="NUTRITION">Nutrition</option>
+                    <option value="WORKOUT">Workout</option>
+                    <option value="MENTAL_HEALTH">Mental Health</option>
+                    <option value="TIPS">Tips</option>
+                    <option value="SUCCESS_STORIES">Success Stories</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">CONTENT</label>
+                <textarea id="blog-content" class="form-control" rows="8" required></textarea>
+            </div>
+
+            <div class="form-group" id="image-group">
+                <label class="form-label">IMAGE URL (OPTIONAL)</label>
+                <input type="url" id="blog-image-url" class="form-control" placeholder="https://example.com/image.jpg">
+            </div>
+
+            <div class="form-group" id="file-group">
+                <label class="form-label">OR UPLOAD NEW IMAGE</label>
+                <input type="file" id="blog-image-file" class="form-control" accept="image/*">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Update Blog</button>
+            <a href="/articles" id="cancel-btn" class="btn btn-secondary">Discard Changes</a>
+        </form>
+    </div>
+
+    <script th:inline="javascript">
+        const urlParams = new URLSearchParams(window.location.search);
+        const blogId = urlParams.get('id');
+
+        if (!blogId) window.location.href = '/articles';
+
+        function toggleImageField() {
+            const typeEl = document.getElementById('blog-type');
+            const group = document.getElementById('image-group');
+            if (typeEl && group) {
+                group.style.display = typeEl.value === 'POST' ? 'none' : 'block';
+            }
+        }
+
+        document.getElementById('blog-type').addEventListener('change', toggleImageField);
+
+        async function loadBlogData() {
+            try {
+                const response = await fetch(`/api/blogs/${blogId}`);
+                if (response.ok) {
+                    const blog = await response.json();
+                    document.getElementById('blog-title').value = blog.title;
+                    document.getElementById('blog-category').value = blog.category;
+                    document.getElementById('blog-content').value = blog.content;
+                    document.getElementById('blog-image-url').value = blog.imageUrl || '';
+                    if (document.getElementById('blog-type')) {
+                        document.getElementById('blog-type').value = blog.contentType;
+                    }
+                    document.getElementById('cancel-btn').href = `/articles/detail?id=${blogId}`;
+                    toggleImageField();
+                } else {
+                    window.location.href = '/articles';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        document.getElementById('edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const blogData = {
+                title: document.getElementById('blog-title').value,
+                category: document.getElementById('blog-category').value,
+                content: document.getElementById('blog-content').value,
+                imageUrl: document.getElementById('blog-image-url').value,
+                contentType: document.getElementById('blog-type').value
+            };
+
+            const formData = new FormData();
+            formData.append('blog', new Blob([JSON.stringify(blogData)], { type: 'application/json' }));
+
+            const imageFile = document.getElementById('blog-image-file').files[0];
+            if (imageFile) {
+                formData.append('image', imageFile);
+            }
+
+            try {
+                const response = await fetch(`/api/blogs/${blogId}`, {
+                    method: 'PUT',
+                    body: formData
+                });
+                if (response.ok) window.location.href = `/articles/detail?id=${blogId}`;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', loadBlogData);
+    </script>
+</body>
+
+</html>

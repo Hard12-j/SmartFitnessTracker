@@ -221,10 +221,36 @@
 
             <div class="form-group">
                 <label class="form-label">Role</label>
-                <select name="role" class="form-control">
+                <select name="role" class="form-control" id="roleSelect" onchange="toggleTrainerFields()">
                     <option value="USER">User</option>
                     <option value="TRAINER">Trainer</option>
+                    <option value="ADMIN">Admin</option>
                 </select>
+            </div>
+
+            <!-- Trainer Specific Fields -->
+            <div id="trainerFields" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">Specialization</label>
+                    <input type="text" name="specialization" class="form-control"
+                        placeholder="e.g. Yoga, Strength Training" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Experience</label>
+                    <input type="text" name="experience" class="form-control" placeholder="e.g. 5+ years" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Location</label>
+                    <input type="text" name="trainerLocation" class="form-control" placeholder="City or Gym Name" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Availability</label>
+                    <input type="text" name="availability" class="form-control" placeholder="e.g. Mon-Fri, 9am-5pm" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contact Number</label>
+                    <input type="text" name="contactNo" class="form-control" placeholder="Phone Number" />
+                </div>
             </div>
 
             <button type="submit" class="btn-register">Sign Up</button>
@@ -307,6 +333,12 @@
                 errorDiv.style.display = 'none';
             }
         });
+
+        function toggleTrainerFields() {
+            const role = document.getElementById('roleSelect').value;
+            const trainerFields = document.getElementById('trainerFields');
+            trainerFields.style.display = (role === 'TRAINER') ? 'block' : 'none';
+        }
     </script>
 </body>
 

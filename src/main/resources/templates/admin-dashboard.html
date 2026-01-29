@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Admin Dashboard - Health Tracker</title>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --danger: #ef4444;
+            --success: #10b981;
+            --accent: #38bdf8;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            background-color: var(--card-bg);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-decoration: none;
+            letter-spacing: -0.025em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--text-main);
+        }
+
+        .btn-logout {
+            background-color: var(--danger);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .header {
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 1rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background-color: rgba(99, 102, 241, 0.1);
+            color: var(--primary-color);
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .table-container {
+            background-color: var(--card-bg);
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background-color: rgba(255, 255, 255, 0.02);
+            padding: 1rem 1.5rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.95rem;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-verified {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .badge-pending {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        .btn-action {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-verify {
+            background-color: var(--success);
+            color: white;
+            margin-right: 0.5rem;
+        }
+
+        .btn-delete {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .btn-delete:hover {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .close {
+            position: absolute;
+            right: 1.5rem;
+            top: 1rem;
+            color: var(--text-secondary);
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .close:hover {
+            color: var(--danger);
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .detail-item {
+            background-color: rgba(255, 255, 255, 0.02);
+            padding: 1rem;
+            border-radius: 0.75rem;
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .stats-section {
+            margin-top: 2rem;
+        }
+
+        .stats-section h3 {
+            color: var(--accent);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .mini-table th,
+        .mini-table td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <a href="/admin/dashboard" class="navbar-brand">AdminPanel</a>
+        <div class="nav-links">
+            <a href="/admin/dashboard" class="nav-link" style="color: var(--accent);">Admin Dashboard</a>
+            <a href="/articles" class="nav-link">BLOG</a>
+            <a href="/profile" class="nav-link">My Profile</a>
+            <a href="/logout" class="btn-logout">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>System Management</h1>
+            <p>Monitor users, verify trainers, and manage accounts.</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showSection('users', this)">Users</button>
+            <button class="tab-btn" onclick="showSection('trainers', this)">Trainers</button>
+        </div>
+
+        <div id="users" class="section active">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="user : ${users}">
+                            <td th:text="${user.id}">1</td>
+                            <td>
+                                <a href="javascript:void(0)" th:onclick="'showUserStats(' + ${user.id} + ')'"
+                                    th:text="${user.first} + ' ' + ${user.last}"
+                                    style="color: var(--accent); text-decoration: none; font-weight: 600;">John Doe</a>
+                            </td>
+                            <td th:text="${user.username}">john@example.com</td>
+                            <td>
+                                <span th:if="${user.verifiedUser}" class="badge badge-verified">Verified</span>
+                                <span th:unless="${user.verifiedUser}" class="badge badge-pending">Pending</span>
+                            </td>
+                            <td>
+                                <form th:if="!${user.verifiedUser}"
+                                    th:action="@{/admin/verify-user/{id}(id=${user.id})}" method="post"
+                                    style="display: inline;">
+                                    <button type="submit" class="btn-action btn-verify">Verify</button>
+                                </form>
+                                <form th:action="@{/admin/delete-user/{id}(id=${user.id})}" method="post"
+                                    style="display: inline;"
+                                    onsubmit="return confirm('Are you sure you want to delete this user?')">
+                                    <button type="submit" class="btn-action btn-delete">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="trainers" class="section">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="trainer : ${trainers}">
+                            <td th:text="${trainer.id}">2</td>
+                            <td>
+                                <a href="javascript:void(0)" th:onclick="'showUserStats(' + ${trainer.id} + ')'"
+                                    th:text="${trainer.first} + ' ' + ${trainer.last}"
+                                    style="color: var(--accent); text-decoration: none; font-weight: 600;">Jane
+                                    Smith</a>
+                            </td>
+                            <td>
+                                <span th:if="${trainer.verifiedTrainer}" class="badge badge-verified">Verified</span>
+                                <span th:unless="${trainer.verifiedTrainer}" class="badge badge-pending">Pending</span>
+                            </td>
+                            <td>
+                                <form th:if="!${trainer.verifiedTrainer}"
+                                    th:action="@{/admin/verify-trainer/{id}(id=${trainer.id})}" method="post"
+                                    style="display: inline;">
+                                    <button type="submit" class="btn-action btn-verify">Verify</button>
+                                </form>
+                                <form th:action="@{/admin/delete-user/{id}(id=${trainer.id})}" method="post"
+                                    style="display: inline;"
+                                    onsubmit="return confirm('Are you sure you want to delete this trainer?')">
+                                    <button type="submit" class="btn-action btn-delete">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Modal -->
+    <div id="statsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modalBody">
+                <div style="text-align: center; padding: 3rem;">
+                    <p style="color: var(--text-secondary);">Loading details...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showSection(sectionId, btn) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        async function showUserStats(userId) {
+            const modal = document.getElementById('statsModal');
+            const modalBody = document.getElementById('modalBody');
+            modal.style.display = 'block';
+            modalBody.innerHTML = '<div style="text-align: center; padding: 3rem;"><p style="color: var(--text-secondary);">Loading details...</p></div>';
+
+            try {
+                const response = await fetch(`/admin/api/user-details/${userId}`);
+                const data = await response.json();
+
+                if (!data.user) {
+                    modalBody.innerHTML = '<p>User not found.</p>';
+                    return;
+                }
+
+                const user = data.user;
+                const workouts = data.workouts || [];
+                const meals = data.meals || [];
+
+                let profileDetails = '';
+                if (user.role === 'TRAINER') {
+                    profileDetails = `
+                        <div class="detail-item">
+                            <div class="detail-label">Specialization</div>
+                            <div class="detail-value">${user.specialization || 'Not specified'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Experience</div>
+                            <div class="detail-value">${user.experience || 'Not specified'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Location / Contact</div>
+                            <div class="detail-value">${user.trainerLocation || '--'} / ${user.contactNo || '--'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Availability</div>
+                            <div class="detail-value">${user.availability || '--'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Verification Status</div>
+                            <div class="detail-value">${user.verifiedTrainer ? '<span style="color: var(--success)">Verified</span>' : '<span style="color: #f59e0b">Pending</span>'}</div>
+                        </div>
+                    `;
+                } else {
+                    profileDetails = `
+                        <div class="detail-item" style="grid-column: 1 / -1; display: flex; align-items: center; gap: 1rem;">
+                            <img src="${user.profileImageUrl || '/images/default-avatar.png'}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent);" onerror="this.src='https://ui-avatars.com/api/?name=${user.first}+${user.last}&background=38bdf8&color=fff'">
+                            <div>
+                                <div class="detail-label">Profile Image</div>
+                                <div class="detail-value">User Avatar</div>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Age / Height / Weight</div>
+                            <div class="detail-value">${user.age || '--'} / ${user.height || '--'} cm / ${user.weight || '--'} kg</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Assigned Trainer</div>
+                            <div class="detail-value">${data.trainerName ? `${data.trainerName} (ID: ${user.assignedTrainerId})` : 'None'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Verification Status</div>
+                            <div class="detail-value">${user.verifiedUser ? '<span style="color: var(--success)">Verified</span>' : '<span style="color: #f59e0b">Pending</span>'}</div>
+                        </div>
+                    `;
+                }
+
+                let html = `
+                    <h2 style="margin-top: 0;">${user.first} ${user.last}</h2>
+                    <p style="color: var(--text-secondary); margin-top: -0.5rem; margin-bottom: 2rem;">${user.username} | ${user.role}</p>
+                    
+                    <div class="details-grid">
+                        ${profileDetails}
+                    </div>
+
+                    ${user.role === 'USER' ? `
+                        <div class="stats-section">
+                            <h3>Recent Workouts (${workouts.length})</h3>
+                            ${workouts.length > 0 ? `
+                                <table class="mini-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>Duration</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${workouts.slice(0, 5).map(w => `
+                                            <tr>
+                                                <td>${w.date}</td>
+                                                <td>${w.type}</td>
+                                                <td>${w.duration} min</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            ` : '<p style="color: var(--text-secondary); font-size: 0.9rem;">No workouts recorded.</p>'}
+                        </div>
+
+                        <div class="stats-section">
+                            <h3>Diet Logs (${meals.length})</h3>
+                            ${meals.length > 0 ? `
+                                <table class="mini-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Meal</th>
+                                            <th>Calories</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${meals.slice(0, 5).map(m => `
+                                            <tr>
+                                                <td>${m.date}</td>
+                                                <td>${m.mealName}</td>
+                                                <td>${m.calories} kcal</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            ` : '<p style="color: var(--text-secondary); font-size: 0.9rem;">No meals recorded.</p>'}
+                        </div>
+                    ` : ''}
+                `;
+
+                modalBody.innerHTML = html;
+            } catch (error) {
+                console.error('Error fetching details:', error);
+                modalBody.innerHTML = '<p style="color: var(--danger)">Failed to load details.</p>';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('statsModal').style.display = 'none';
+        }
+
+        window.onclick = function (event) {
+            const modal = document.getElementById('statsModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+
+</html>

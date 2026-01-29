@@ -238,9 +238,8 @@
             </div>
             <a href="/bmi" class="nav-link" sec:authorize="hasRole('USER')">BMI Calculator</a>
             <a href="/trainer-matching" class="nav-link" sec:authorize="hasRole('USER')">Trainer Matching</a>
-            <a th:href="${#authorization.expression('hasRole(''TRAINER'')') ? '/trainer/dashboard' : '/welcome'}"
-                class="nav-link">Dashboard</a>
-            <a href="/blogs" class="nav-link">Blogs</a>
+            <a href="/articles" class="nav-link">BLOG</a>
+            <a href="/community" class="nav-link">Community</a>
             <a href="/profile" class="nav-link" style="color: var(--primary-color);">My Profile</a>
             <a href="/logout" class="btn-logout">Logout</a>
         </div>

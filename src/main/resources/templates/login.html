@@ -165,14 +165,22 @@
         </div>
 
         <div th:if="${param.error != null}">
-            <div th:if="${param.error[0] == 'email'}" class="error-msg">
-                Invalid Email.
+            <!-- Show specific verification error if it exists in session -->
+            <div th:if="${session.SPRING_SECURITY_LAST_EXCEPTION != null and session.SPRING_SECURITY_LAST_EXCEPTION.message.contains('verification')}"
+                class="error-msg">
+                Your account is pending admin verification.
             </div>
-            <div th:if="${param.error[0] == 'password'}" class="error-msg">
-                Incorrect Password.
-            </div>
-            <div th:if="${param.error[0] != 'email' and param.error[0] != 'password'}" class="error-msg">
-                Invalid username or password.
+            <div
+                th:unless="${session.SPRING_SECURITY_LAST_EXCEPTION != null and session.SPRING_SECURITY_LAST_EXCEPTION.message.contains('verification')}">
+                <div th:if="${param.error[0] == 'email'}" class="error-msg">
+                    Invalid Email.
+                </div>
+                <div th:if="${param.error[0] == 'password'}" class="error-msg">
+                    Incorrect Password.
+                </div>
+                <div th:if="${param.error[0] != 'email' and param.error[0] != 'password'}" class="error-msg">
+                    Invalid username or password.
+                </div>
             </div>
         </div>
 

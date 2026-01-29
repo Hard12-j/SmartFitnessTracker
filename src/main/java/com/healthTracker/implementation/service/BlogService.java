@@ -12,6 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,6 +48,18 @@ public class BlogService {
                 .collect(Collectors.toList());
     }
 
+    public List<BlogDTO> getBlogsByContentType(String contentType) {
+        return blogRepository.findByContentTypeOrderByPublishedDateDesc(contentType).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<BlogDTO> getBlogsByAuthorType(String authorType) {
+        return blogRepository.findByAuthorTypeOrderByPublishedDateDesc(authorType).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
     public BlogDTO getBlogById(Long id) {
         Blog blog = blogRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Blog not found with id: " + id));
@@ -56,6 +76,7 @@ public class BlogService {
         blog.setAuthorType(blogDTO.getAuthorType());
         blog.setImageUrl(blogDTO.getImageUrl());
         blog.setStatus(blogDTO.getStatus() != null ? blogDTO.getStatus() : "PUBLISHED");
+        blog.setContentType(blogDTO.getContentType() != null ? blogDTO.getContentType() : "ARTICLE");
 
         Blog savedBlog = blogRepository.save(blog);
         return convertToDTO(savedBlog);
@@ -71,6 +92,9 @@ public class BlogService {
         blog.setImageUrl(blogDTO.getImageUrl());
         if (blogDTO.getStatus() != null) {
             blog.setStatus(blogDTO.getStatus());
+        }
+        if (blogDTO.getContentType() != null) {
+            blog.setContentType(blogDTO.getContentType());
         }
 
         Blog updatedBlog = blogRepository.save(blog);
@@ -132,6 +156,25 @@ public class BlogService {
         return likeRepository.existsByBlogIdAndUserName(blogId, userName);
     }
 
+    public String saveBlogImage(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty())
+            return null;
+
+        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+        Path uploadPath = Paths.get("uploads/blogs");
+
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        try (InputStream inputStream = file.getInputStream()) {
+            Path filePath = uploadPath.resolve(fileName);
+            Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+        }
+
+        return "/uploads/blogs/" + fileName;
+    }
+
     private BlogDTO convertToDTO(Blog blog) {
         BlogDTO dto = new BlogDTO();
         dto.setId(blog.getId());
@@ -144,6 +187,7 @@ public class BlogService {
         dto.setPublishedDate(blog.getPublishedDate());
         dto.setImageUrl(blog.getImageUrl());
         dto.setStatus(blog.getStatus());
+        dto.setContentType(blog.getContentType());
         dto.setLikesCount(likeRepository.countByBlogId(blog.getId()));
         dto.setCommentsCount(commentRepository.findByBlogIdOrderByCreatedAtAsc(blog.getId()).size());
         return dto;

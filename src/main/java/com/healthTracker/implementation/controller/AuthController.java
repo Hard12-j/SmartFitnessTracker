@@ -51,6 +51,13 @@ public class AuthController {
             user.setPassword(userDto.getPassword());
             user.setRole(userDto.getRole());
 
+            // Set trainer fields
+            user.setSpecialization(userDto.getSpecialization());
+            user.setExperience(userDto.getExperience());
+            user.setTrainerLocation(userDto.getTrainerLocation());
+            user.setAvailability(userDto.getAvailability());
+            user.setContactNo(userDto.getContactNo());
+
             userService.registerUser(user);
             System.out.println("successfully registered");
             redirectAttributes.addFlashAttribute("success", "User registered successfully!");
@@ -88,6 +95,9 @@ public class AuthController {
 
         if ("TRAINER".equalsIgnoreCase(user.getRole())) {
             return "redirect:/trainer/dashboard";
+        }
+        if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+            return "redirect:/admin/dashboard";
         }
 
         // Today's Date

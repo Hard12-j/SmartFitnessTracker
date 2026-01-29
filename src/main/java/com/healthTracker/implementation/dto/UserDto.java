@@ -17,4 +17,11 @@ public class UserDto {
 
     private String cnfPassword;
     private String role;
+
+    // Trainer specific fields
+    private String specialization;
+    private String experience;
+    private String trainerLocation;
+    private String availability;
+    private String contactNo;
 }
