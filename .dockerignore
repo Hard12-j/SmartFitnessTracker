@@ -1,0 +1,9 @@
+target/
+.git/
+.idea/
+.vscode/
+*.md
+uploads/
+.gitignore
+.gitattributes
+.mailmap
