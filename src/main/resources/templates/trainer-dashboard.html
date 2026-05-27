@@ -74,6 +74,24 @@
             font-weight: 600;
         }
 
+        .btn-chat {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 12px rgba(99,102,241,0.35);
+        }
+        .btn-chat:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(99,102,241,0.55);
+        }
+
         .btn-accept {
             background: #10b981;
             color: white;
@@ -160,10 +178,13 @@
                 <p th:text="${user.goals}" style="margin: 0.5rem 0 0; color: #64748b;">Goals</p>
                 <small th:text="'Age: ' + ${user.age} + ' | Weight: ' + ${user.weight} + 'kg'"></small>
             </div>
-            <div style="display: flex; gap: 1rem;">
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <a th:href="@{'/trainer/analysis/' + ${user.id}}" class="btn-assign"
                     style="background: var(--text-dark);">Analysis</a>
                 <a th:href="@{'/trainer/assign-plan/' + ${user.id}}" class="btn-assign">Assign Plans</a>
+                <a th:href="@{'/chat/' + ${user.id}}" class="btn-chat">
+                    <i class="bi bi-chat-dots-fill"></i> Chat
+                </a>
             </div>
         </div>
 

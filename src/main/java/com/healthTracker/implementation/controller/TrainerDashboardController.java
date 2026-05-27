@@ -112,19 +112,73 @@ public class TrainerDashboardController {
         }
 
         @PostMapping("/assign-diet")
-        public String saveDiet(@ModelAttribute DietPlan dietPlan, Principal principal) {
-                User trainer = userService.getUserByUsername(principal.getName());
-                dietPlan.setTrainerId(trainer.getId());
-                planService.saveDietPlan(dietPlan);
-                return "redirect:/trainer/assign-plan/" + dietPlan.getUserId();
+        public String saveDiet(
+                        @ModelAttribute DietPlan dietPlan,
+                        @RequestParam("userId") Long userId,
+                        Principal principal,
+                        org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+                if (principal == null) return "redirect:/login";
+                try {
+                        User trainer = userService.getUserByUsername(principal.getName());
+                        dietPlan.setUserId(userId);
+                        dietPlan.setTrainerId(trainer.getId());
+                        planService.saveDietPlan(dietPlan);
+                        redirectAttributes.addFlashAttribute("successMsg", "Diet entry added successfully!");
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        redirectAttributes.addFlashAttribute("errorMsg", "Failed to save diet plan: " + e.getMessage());
+                }
+                return "redirect:/trainer/assign-plan/" + userId;
         }
 
         @PostMapping("/assign-exercise")
-        public String saveExercise(@ModelAttribute ExercisePlan exercisePlan, Principal principal) {
-                User trainer = userService.getUserByUsername(principal.getName());
-                exercisePlan.setTrainerId(trainer.getId());
-                planService.saveExercisePlan(exercisePlan);
-                return "redirect:/trainer/assign-plan/" + exercisePlan.getUserId();
+        public String saveExercise(
+                        @ModelAttribute ExercisePlan exercisePlan,
+                        @RequestParam("userId") Long userId,
+                        Principal principal,
+                        org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+                if (principal == null) return "redirect:/login";
+                try {
+                        User trainer = userService.getUserByUsername(principal.getName());
+                        exercisePlan.setUserId(userId);
+                        exercisePlan.setTrainerId(trainer.getId());
+                        planService.saveExercisePlan(exercisePlan);
+                        redirectAttributes.addFlashAttribute("successMsg", "Exercise entry added successfully!");
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        redirectAttributes.addFlashAttribute("errorMsg", "Failed to save exercise plan: " + e.getMessage());
+                }
+                return "redirect:/trainer/assign-plan/" + userId;
+        }
+
+        @PostMapping("/delete-diet")
+        public String deleteDiet(
+                        @RequestParam("dietId") Long dietId,
+                        @RequestParam("userId") Long userId,
+                        org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+                try {
+                        planService.deleteDietPlan(dietId);
+                        redirectAttributes.addFlashAttribute("successMsg", "Diet entry removed.");
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        redirectAttributes.addFlashAttribute("errorMsg", "Could not remove diet entry: " + e.getMessage());
+                }
+                return "redirect:/trainer/assign-plan/" + userId;
+        }
+
+        @PostMapping("/delete-exercise")
+        public String deleteExercise(
+                        @RequestParam("exerciseId") Long exerciseId,
+                        @RequestParam("userId") Long userId,
+                        org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+                try {
+                        planService.deleteExercisePlan(exerciseId);
+                        redirectAttributes.addFlashAttribute("successMsg", "Exercise entry removed.");
+                } catch (Exception e) {
+                        e.printStackTrace();
+                        redirectAttributes.addFlashAttribute("errorMsg", "Could not remove exercise entry: " + e.getMessage());
+                }
+                return "redirect:/trainer/assign-plan/" + userId;
         }
 
         @GetMapping("/analysis/{userId}")

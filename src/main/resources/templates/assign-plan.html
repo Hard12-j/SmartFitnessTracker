@@ -67,6 +67,7 @@
             cursor: pointer;
             font-weight: 600;
             width: 100%;
+            margin-top: 0.5rem;
         }
 
         .plan-list {
@@ -79,7 +80,36 @@
             border-radius: 0.5rem;
             margin-bottom: 0.5rem;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
         }
+
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.35rem 0.75rem;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            flex-shrink: 0;
+            margin-left: 0.5rem;
+            transition: background 0.2s;
+        }
+
+        .btn-delete:hover { background: #dc2626; }
+
+        .alert {
+            padding: 0.9rem 1.2rem;
+            border-radius: 0.6rem;
+            margin-bottom: 1.2rem;
+            font-weight: 600;
+        }
+
+        .alert-success { background: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
+        .alert-error   { background: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
     </style>
 </head>
 
@@ -98,10 +128,15 @@
     </nav>
 
     <div class="container">
+
+        <!-- Flash Messages -->
+        <div th:if="${successMsg}" class="alert alert-success" th:text="${successMsg}"></div>
+        <div th:if="${errorMsg}"   class="alert alert-error"   th:text="${errorMsg}"></div>
+
         <!-- Diet Plan Section -->
         <div class="form-section">
             <h3>Add Diet Entry</h3>
-            <form action="/trainer/assign-diet" method="post">
+            <form th:action="@{/trainer/assign-diet}" method="post">
                 <input type="hidden" name="userId" th:value="${user.id}">
                 <div class="form-group">
                     <label class="form-label">Day of Week</label>
@@ -117,12 +152,11 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Meal Name</label>
-                    <input type="text" name="mealName" class="form-control" placeholder="e.g. Oatmeal with Fruits"
-                        required>
+                    <input type="text" name="mealName" class="form-control" placeholder="e.g. Oatmeal with Fruits" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Calories</label>
-                    <input type="number" name="calories" class="form-control" placeholder="e.g. 450" required>
+                    <input type="number" name="calories" class="form-control" placeholder="e.g. 450" min="1" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Notes</label>
@@ -133,11 +167,18 @@
 
             <div class="plan-list">
                 <h4>Existing Diet Entries</h4>
+                <p th:if="${#lists.isEmpty(dietPlans)}" style="color:#64748b; font-size:0.9rem;">No diet entries yet.</p>
                 <div th:each="diet : ${dietPlans}" class="plan-item">
-                    <strong th:text="${diet.dayOfWeek} + ': ' + ${diet.mealName}"></strong>
-                    <span th:text="'(' + ${diet.calories} + ' cal)'"></span>
-                    <p th:text="${diet.description}" style="margin: 0.25rem 0 0; font-size: 0.9rem; color: #64748b;">
-                    </p>
+                    <div>
+                        <strong th:text="${diet.dayOfWeek} + ': ' + ${diet.mealName}"></strong>
+                        <span th:text="' (' + ${diet.calories} + ' cal)'" style="color:#475569;"></span>
+                        <p th:text="${diet.description}" style="margin: 0.25rem 0 0; font-size: 0.9rem; color: #64748b;"></p>
+                    </div>
+                    <form th:action="@{/trainer/delete-diet}" method="post" style="margin:0;">
+                        <input type="hidden" name="dietId" th:value="${diet.id}">
+                        <input type="hidden" name="userId" th:value="${user.id}">
+                        <button type="submit" class="btn-delete">✕ Remove</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -145,7 +186,7 @@
         <!-- Exercise Plan Section -->
         <div class="form-section">
             <h3>Add Exercise Entry</h3>
-            <form action="/trainer/assign-exercise" method="post">
+            <form th:action="@{/trainer/assign-exercise}" method="post">
                 <input type="hidden" name="userId" th:value="${user.id}">
                 <div class="form-group">
                     <label class="form-label">Day of Week</label>
@@ -166,11 +207,11 @@
                 <div style="display: flex; gap: 1rem;">
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Sets</label>
-                        <input type="number" name="sets" class="form-control" required>
+                        <input type="number" name="sets" class="form-control" min="1" required>
                     </div>
                     <div class="form-group" style="flex: 1;">
                         <label class="form-label">Reps</label>
-                        <input type="number" name="reps" class="form-control" required>
+                        <input type="number" name="reps" class="form-control" min="1" required>
                     </div>
                 </div>
                 <div class="form-group">
@@ -182,10 +223,18 @@
 
             <div class="plan-list">
                 <h4>Existing Workout Entries</h4>
+                <p th:if="${#lists.isEmpty(exercisePlans)}" style="color:#64748b; font-size:0.9rem;">No exercise entries yet.</p>
                 <div th:each="ex : ${exercisePlans}" class="plan-item">
-                    <strong th:text="${ex.dayOfWeek} + ': ' + ${ex.exerciseName}"></strong>
-                    <span th:text="${ex.sets} + ' sets x ' + ${ex.reps} + ' reps'"></span>
-                    <p th:text="${ex.description}" style="margin: 0.25rem 0 0; font-size: 0.9rem; color: #64748b;"></p>
+                    <div>
+                        <strong th:text="${ex.dayOfWeek} + ': ' + ${ex.exerciseName}"></strong>
+                        <span th:text="' — ' + ${ex.sets} + ' sets × ' + ${ex.reps} + ' reps'" style="color:#475569;"></span>
+                        <p th:text="${ex.description}" style="margin: 0.25rem 0 0; font-size: 0.9rem; color: #64748b;"></p>
+                    </div>
+                    <form th:action="@{/trainer/delete-exercise}" method="post" style="margin:0;">
+                        <input type="hidden" name="exerciseId" th:value="${ex.id}">
+                        <input type="hidden" name="userId" th:value="${user.id}">
+                        <button type="submit" class="btn-delete">✕ Remove</button>
+                    </form>
                 </div>
             </div>
         </div>

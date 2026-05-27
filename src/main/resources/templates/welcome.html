@@ -4,6 +4,7 @@
 <head>
     <title>Dashboard - Health Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         :root {
             --primary-color: #4F46E5;
@@ -673,6 +674,93 @@
                 }
             }
         </script>
+        <br>
+        <br>
+
+        <!-- ── Trainer Chat Banner ─────────────────────────────────────── -->
+        <h2 class="section-title">Your Trainer</h2>
+        <div style="margin-bottom: 2.5rem;">
+
+            <!-- Has assigned trainer → show Chat button -->
+            <div th:if="${user.assignedTrainerId != null}"
+                 style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%);
+                        border-radius: 1rem;
+                        padding: 2rem 2.5rem;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 1.5rem;
+                        border: 1px solid rgba(99,102,241,0.4);
+                        box-shadow: 0 0 30px rgba(99,102,241,0.15);
+                        flex-wrap: wrap;">
+                <div style="display:flex; align-items:center; gap:1.25rem;">
+                    <div style="width:54px; height:54px; border-radius:50%;
+                                background: linear-gradient(135deg,#6366f1,#8b5cf6);
+                                display:flex; align-items:center; justify-content:center;
+                                font-size:1.5rem; font-weight:700; color:white; flex-shrink:0;
+                                box-shadow: 0 0 16px rgba(99,102,241,0.55);">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:0.8rem; text-transform:uppercase; letter-spacing:0.08em;
+                                    color:#a5b4fc; margin-bottom:0.2rem;">Your Assigned Trainer</div>
+                        <div style="font-size:1.15rem; font-weight:700; color:#f1f5f9;">
+                            Trainer is ready to help you!
+                        </div>
+                        <div style="font-size:0.85rem; color:#94a3b8; margin-top:0.15rem;">
+                            Start a real-time conversation with your personal trainer.
+                        </div>
+                    </div>
+                </div>
+                <a th:href="@{'/chat/' + ${user.assignedTrainerId}}"
+                   style="display:inline-flex; align-items:center; gap:0.6rem;
+                          background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                          color:white; padding:0.8rem 1.75rem; border-radius:2rem;
+                          text-decoration:none; font-weight:600; font-size:1rem;
+                          box-shadow: 0 4px 18px rgba(99,102,241,0.45);
+                          transition: transform 0.2s, box-shadow 0.2s;
+                          white-space:nowrap;"
+                   onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(99,102,241,0.6)'"
+                   onmouseout="this.style.transform='';this.style.boxShadow='0 4px 18px rgba(99,102,241,0.45)'">
+                    <i class="bi bi-chat-dots-fill"></i> Chat with Trainer
+                </a>
+            </div>
+
+            <!-- No trainer assigned → prompt to find one -->
+            <div th:if="${user.assignedTrainerId == null}"
+                 style="background: linear-gradient(135deg, #0f1724 0%, #1e293b 100%);
+                        border-radius: 1rem;
+                        padding: 2rem 2.5rem;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 1.5rem;
+                        border: 1px dashed rgba(148,163,184,0.3);
+                        flex-wrap: wrap;">
+                <div>
+                    <div style="font-size:1rem; font-weight:600; color:#94a3b8; margin-bottom:0.35rem;">
+                        No trainer assigned yet
+                    </div>
+                    <div style="font-size:0.875rem; color:#64748b;">
+                        Connect with a certified trainer to get personalised plans and real-time support.
+                    </div>
+                </div>
+                <a href="/trainer-matching"
+                   style="display:inline-flex; align-items:center; gap:0.5rem;
+                          background: transparent; color:#6366f1;
+                          padding:0.7rem 1.5rem; border-radius:2rem;
+                          text-decoration:none; font-weight:600; font-size:0.95rem;
+                          border: 2px solid #6366f1;
+                          transition: background 0.2s, color 0.2s;
+                          white-space:nowrap;"
+                   onmouseover="this.style.background='#6366f1';this.style.color='white'"
+                   onmouseout="this.style.background='transparent';this.style.color='#6366f1'">
+                    <i class="bi bi-search-heart"></i> Find a Trainer
+                </a>
+            </div>
+        </div>
+        <!-- ────────────────────────────────────────────────────────────── -->
+
         <br>
         <br>
         <h2 class="section-title">Daily Recommendation</h2>

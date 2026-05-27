@@ -44,7 +44,7 @@ public class SecurityConfig {
 								"/uploads/**", "/css/**", "/js/**", "/images/**")
 						.permitAll()
 						.requestMatchers("/welcome", "/profile", "/update-profile", "/update-goals", "/articles/**",
-								"/api/blogs/**")
+								"/api/blogs/**", "/chat/**", "/ws/**")
 						.hasAnyRole("USER", "TRAINER", "ADMIN")
 						.requestMatchers("/admin/**").hasRole("ADMIN")
 						.requestMatchers("/trainer/**").hasAnyRole("TRAINER", "ADMIN")
