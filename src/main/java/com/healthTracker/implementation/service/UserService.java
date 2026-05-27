@@ -131,4 +131,12 @@ public class UserService {
             userRepository.save(user);
         }
     }
+
+    public void unverifyTrainer(Long id) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user != null && "TRAINER".equalsIgnoreCase(user.getRole())) {
+            user.setVerifiedTrainer(false);
+            userRepository.save(user);
+        }
+    }
 }

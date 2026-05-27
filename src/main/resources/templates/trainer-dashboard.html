@@ -52,6 +52,19 @@
             align-items: center;
         }
 
+        .request-card {
+            background: linear-gradient(135deg, #d4e7f7 0%, #b2d3f0 100%);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid #fbbf24;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
         .btn-assign {
             background: var(--primary-color);
             color: white;
@@ -59,6 +72,38 @@
             border-radius: 0.5rem;
             text-decoration: none;
             font-weight: 600;
+        }
+
+        .btn-accept {
+            background: #10b981;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-accept:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .btn-reject {
+            background: #ef4444;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-reject:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
         }
 
         .welcome-msg {
@@ -83,6 +128,25 @@
         <div class="welcome-msg">
             <h1 th:text="'Hello, Coach ' + ${trainer.first} + '!'">Welcome</h1>
             <p>Manage your clients and assign their daily fitness plans.</p>
+        </div>
+
+        <!-- Pending Client Requests Section -->
+        <div th:if="${not #lists.isEmpty(pendingRequests)}">
+            <h2 style="color: #fbbf24; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                <i class="bi bi-person-fill-exclamation"></i> Pending Client Requests
+            </h2>
+            <div th:each="req : ${pendingRequests}" class="request-card" th:id="'request-card-' + ${req.id}">
+                <div>
+                    <h3 th:text="${req.user.first} + ' ' + ${req.user.last}" style="margin: 0;">User Name</h3>
+                    <p th:text="${req.user.goals}" style="margin: 0.5rem 0 0; color: #475569; font-weight: 500;">Goals</p>
+                    <small style="color: #64748b;" th:text="'Age: ' + ${req.user.age} + ' | Weight: ' + ${req.user.weight} + 'kg'"></small>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn-accept" th:onclick="'handleRequest(' + ${req.id} + ', \'accept\')'">Accept</button>
+                    <button class="btn-reject" th:onclick="'handleRequest(' + ${req.id} + ', \'reject\')'">Reject</button>
+                </div>
+            </div>
+            <br>
         </div>
 
         <h2>My Clients</h2>
@@ -129,6 +193,32 @@
             </div>
         </div>
     </div>
+
+    <script>
+        async function handleRequest(requestId, action) {
+            const confirmMsg = action === 'accept' 
+                ? 'Are you sure you want to accept this client?' 
+                : 'Are you sure you want to reject this request?';
+            
+            if (!confirm(confirmMsg)) return;
+
+            try {
+                const response = await fetch(`/trainer/requests/${action}?requestId=${requestId}`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    alert(data.message || `Request ${action}ed successfully.`);
+                    window.location.reload();
+                } else {
+                    alert(data.message || `Failed to ${action} request.`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred.');
+            }
+        }
+    </script>
 </body>
 
 </html>

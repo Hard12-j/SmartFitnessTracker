@@ -1,6 +1,8 @@
 package com.healthTracker.implementation.controller;
 
+import com.healthTracker.implementation.model.TrainerRequest.RequestStatus;
 import com.healthTracker.implementation.model.User;
+import com.healthTracker.implementation.service.TrainerRequestService;
 import com.healthTracker.implementation.service.TrainerService;
 import com.healthTracker.implementation.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +27,9 @@ public class TrainerMatchingController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TrainerRequestService trainerRequestService;
 
     @GetMapping("/trainer-matching")
     public String showTrainerMatching(Model model, Principal principal) {
@@ -52,17 +58,55 @@ public class TrainerMatchingController {
         return ResponseEntity.ok(recommended);
     }
 
-    @PostMapping("/api/trainers/book")
+    /**
+     * User sends a request to a trainer (pending approval).
+     */
+    @PostMapping("/api/trainers/request")
     @ResponseBody
-    public ResponseEntity<?> bookTrainer(Principal principal, @RequestParam Long trainerId) {
+    public ResponseEntity<?> requestTrainer(Principal principal, @RequestParam Long trainerId) {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
 
         User user = userService.getUserByUsername(principal.getName());
-        user.setAssignedTrainerId(trainerId);
-        userService.updateUserProfile(user);
+        String result = trainerRequestService.sendRequest(user.getId(), trainerId);
 
-        return ResponseEntity.ok().body(Map.of("message", "Trainer booked successfully!"));
+        Map<String, String> response = new HashMap<>();
+        switch (result) {
+            case "SENT":
+                response.put("status", "SENT");
+                response.put("message", "Request sent! Waiting for trainer approval.");
+                return ResponseEntity.ok(response);
+            case "ALREADY_PENDING":
+                response.put("status", "ALREADY_PENDING");
+                response.put("message", "You already have a pending request to this trainer.");
+                return ResponseEntity.ok(response);
+            case "ALREADY_ASSIGNED":
+                response.put("status", "ALREADY_ASSIGNED");
+                response.put("message", "You are already assigned to this trainer.");
+                return ResponseEntity.ok(response);
+            default:
+                return ResponseEntity.internalServerError().body(Map.of("message", "Something went wrong."));
+        }
+    }
+
+    /**
+     * Get request status for the current user towards a given trainer.
+     */
+    @GetMapping("/api/trainers/request-status")
+    @ResponseBody
+    public ResponseEntity<?> getRequestStatus(Principal principal, @RequestParam Long trainerId) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+        User user = userService.getUserByUsername(principal.getName());
+        RequestStatus status = trainerRequestService.getRequestStatus(user.getId(), trainerId);
+        Map<String, String> response = new HashMap<>();
+        response.put("status", status != null ? status.name() : "NONE");
+        // Also include if this trainer is already assigned
+        if (user.getAssignedTrainerId() != null && user.getAssignedTrainerId().equals(trainerId)) {
+            response.put("status", "ASSIGNED");
+        }
+        return ResponseEntity.ok(response);
     }
 }

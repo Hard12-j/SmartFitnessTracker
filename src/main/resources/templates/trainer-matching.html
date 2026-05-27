@@ -272,7 +272,33 @@
                     return;
                 }
 
-                trainers.forEach(trainer => {
+                for (const trainer of trainers) {
+                    // Fetch request status for this trainer
+                    const statusRes = await fetch(`/api/trainers/request-status?trainerId=${trainer.id}`);
+                    const statusData = await statusRes.json();
+                    const status = statusData.status; // 'PENDING', 'ACCEPTED', 'REJECTED', 'ASSIGNED', or 'NONE'
+
+                    let actionHtml = '';
+                    if (status === 'ASSIGNED' || status === 'ACCEPTED') {
+                        actionHtml = `
+                            <button class="btn-book" style="background: #10b981; cursor: default;" disabled th:disabled="true">
+                                <i class="bi bi-check-circle-fill"></i> My Active Trainer
+                            </button>
+                        `;
+                    } else if (status === 'PENDING') {
+                        actionHtml = `
+                            <button class="btn-book" style="background: #f59e0b; cursor: not-allowed;" disabled th:disabled="true">
+                                <i class="bi bi-hourglass-split"></i> Pending Approval
+                            </button>
+                        `;
+                    } else {
+                        actionHtml = `
+                            <button class="btn-book" onclick="bookTrainer(${trainer.id})">
+                                ${status === 'REJECTED' ? 'Re-apply for Trainer' : 'Book Trainer'}
+                            </button>
+                        `;
+                    }
+
                     const card = document.createElement('div');
                     card.className = 'trainer-card';
                     card.innerHTML = `
@@ -299,14 +325,12 @@
                                 <i class="bi bi-telephone"></i> ${trainer.contactNo || 'N/A'}
                             </div>
                             <div class="booking-actions" style="margin-top: 1.5rem;">
-                                <button class="btn-book" onclick="bookTrainer(${trainer.id})">
-                                    Book Trainer
-                                </button>
+                                ${actionHtml}
                             </div>
                         </div>
                     `;
                     grid.appendChild(card);
-                });
+                }
             } catch (error) {
                 console.error('Error:', error);
                 grid.innerHTML = '<div class="no-trainers">Error loading trainers. Please try again.</div>';
@@ -314,17 +338,18 @@
         }
 
         async function bookTrainer(trainerId) {
-            if (!confirm('Are you sure you want to book this trainer?')) return;
+            if (!confirm('Are you sure you want to request to book this trainer?')) return;
 
             try {
-                const response = await fetch(`/api/trainers/book?trainerId=${trainerId}`, {
+                const response = await fetch(`/api/trainers/request?trainerId=${trainerId}`, {
                     method: 'POST'
                 });
+                const data = await response.json();
                 if (response.ok) {
-                    alert('Trainer booked successfully! You can now start your fitness journey together.');
+                    alert(data.message || 'Request sent successfully!');
                     window.location.reload();
                 } else {
-                    alert('Failed to book trainer. Please try again.');
+                    alert(data.message || 'Failed to book trainer. Please try again.');
                 }
             } catch (error) {
                 console.error('Error:', error);

@@ -58,9 +58,25 @@ public class AdminDashboardController {
         return "redirect:/admin/dashboard";
     }
 
+    @PostMapping("/unverify-user/{id}")
+    public String unverifyUser(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        if (user != null) {
+            user.setVerifiedUser(false);
+            userService.updateUser(user);
+        }
+        return "redirect:/admin/dashboard";
+    }
+
     @PostMapping("/verify-trainer/{id}")
     public String verifyTrainer(@PathVariable Long id) {
         userService.verifyTrainer(id);
+        return "redirect:/admin/dashboard";
+    }
+
+    @PostMapping("/unverify-trainer/{id}")
+    public String unverifyTrainer(@PathVariable Long id) {
+        userService.unverifyTrainer(id);
         return "redirect:/admin/dashboard";
     }
 

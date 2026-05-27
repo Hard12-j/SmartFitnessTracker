@@ -187,6 +187,12 @@
             margin-right: 0.5rem;
         }
 
+        .btn-unverify {
+            background-color: #f59e0b;
+            color: white;
+            margin-right: 0.5rem;
+        }
+
         .btn-delete {
             background-color: rgba(239, 68, 68, 0.1);
             color: var(--danger);
@@ -355,6 +361,11 @@
                                     style="display: inline;">
                                     <button type="submit" class="btn-action btn-verify">Verify</button>
                                 </form>
+                                <form th:if="${user.verifiedUser}"
+                                    th:action="@{/admin/unverify-user/{id}(id=${user.id})}" method="post"
+                                    style="display: inline;">
+                                    <button type="submit" class="btn-action btn-unverify">Unverify</button>
+                                </form>
                                 <form th:action="@{/admin/delete-user/{id}(id=${user.id})}" method="post"
                                     style="display: inline;"
                                     onsubmit="return confirm('Are you sure you want to delete this user?')">
@@ -396,6 +407,11 @@
                                     th:action="@{/admin/verify-trainer/{id}(id=${trainer.id})}" method="post"
                                     style="display: inline;">
                                     <button type="submit" class="btn-action btn-verify">Verify</button>
+                                </form>
+                                <form th:if="${trainer.verifiedTrainer}"
+                                    th:action="@{/admin/unverify-trainer/{id}(id=${trainer.id})}" method="post"
+                                    style="display: inline;">
+                                    <button type="submit" class="btn-action btn-unverify">Unverify</button>
                                 </form>
                                 <form th:action="@{/admin/delete-user/{id}(id=${trainer.id})}" method="post"
                                     style="display: inline;"

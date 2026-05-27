@@ -3,6 +3,7 @@ package com.healthTracker.implementation.controller;
 import com.healthTracker.implementation.model.*;
 import com.healthTracker.implementation.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +12,9 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Controller
@@ -36,6 +39,9 @@ public class TrainerDashboardController {
         @Autowired
         private DailyLogService dailyLogService;
 
+        @Autowired
+        private TrainerRequestService trainerRequestService;
+
         @GetMapping("/dashboard")
         public String trainerDashboard(Model model, Principal principal) {
                 if (principal == null)
@@ -46,10 +52,51 @@ public class TrainerDashboardController {
                                 .filter(u -> trainer.getId().equals(u.getAssignedTrainerId()))
                                 .collect(Collectors.toList());
 
+                List<Map<String, Object>> pendingRequests = new ArrayList<>();
+                for (TrainerRequest req : trainerRequestService.getPendingRequestsForTrainer(trainer.getId())) {
+                        User requester = userService.getUserById(req.getUserId());
+                        if (requester != null) {
+                                Map<String, Object> map = new HashMap<>();
+                                map.put("id", req.getId());
+                                map.put("user", requester);
+                                map.put("requestedAt", req.getRequestedAt());
+                                pendingRequests.add(map);
+                        }
+                }
+
                 model.addAttribute("trainer", trainer);
                 model.addAttribute("users", assignedUsers);
+                model.addAttribute("pendingRequests", pendingRequests);
                 model.addAttribute("healthTip", healthTipService.getDailyTip());
                 return "trainer-dashboard";
+        }
+
+        @PostMapping("/requests/accept")
+        @ResponseBody
+        public ResponseEntity<?> acceptRequest(@RequestParam Long requestId, Principal principal) {
+                if (principal == null) {
+                        return ResponseEntity.status(401).build();
+                }
+                User trainer = userService.getUserByUsername(principal.getName());
+                boolean success = trainerRequestService.acceptRequest(requestId, trainer.getId());
+                if (success) {
+                        return ResponseEntity.ok(Map.of("message", "Request accepted successfully!"));
+                }
+                return ResponseEntity.badRequest().body(Map.of("message", "Failed to accept request."));
+        }
+
+        @PostMapping("/requests/reject")
+        @ResponseBody
+        public ResponseEntity<?> rejectRequest(@RequestParam Long requestId, Principal principal) {
+                if (principal == null) {
+                        return ResponseEntity.status(401).build();
+                }
+                User trainer = userService.getUserByUsername(principal.getName());
+                boolean success = trainerRequestService.rejectRequest(requestId, trainer.getId());
+                if (success) {
+                        return ResponseEntity.ok(Map.of("message", "Request rejected successfully."));
+                }
+                return ResponseEntity.badRequest().body(Map.of("message", "Failed to reject request."));
         }
 
         @GetMapping("/assign-plan/{userId}")
