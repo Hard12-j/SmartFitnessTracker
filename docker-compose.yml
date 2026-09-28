@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: smarthealth-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: jwtexample3
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: smarthealth-app
+    restart: on-failure
+    ports:
+      - "8081:8081"
+    environment:
+      JDBC_DATABASE_URL: jdbc:mysql://mysql:3306/jwtexample3?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
